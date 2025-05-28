@@ -1,16 +1,17 @@
 
+
 :root {
-  --primary-bg: #0a0a0a;
-  --card-bg: #1a1a2e;
-  --primary-text: #ffffff;
-  --secondary-text: #a0a0a0;
-  --accent-color: #00ff41;
-  --accent-hover: #ff073a;
-  --border-light: #16213e;
-  --shadow-sm: 0 1px 3px 0 rgba(0, 255, 65, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 255, 65, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 255, 65, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
-  --gradient: linear-gradient(135deg, #00ff41 0%, #ff073a 100%);
+  --primary-bg: #0f1419;
+  --card-bg: #1e2a3a;
+  --primary-text: #e3f2fd;
+  --secondary-text: #90caf9;
+  --accent-color: #64b5f6;
+  --accent-hover: #42a5f5;
+  --border-light: #2d3748;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.6), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
+  --gradient: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
   --border-radius: 16px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
