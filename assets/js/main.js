@@ -88,7 +88,7 @@ function createSidebar() {
 
   const sidebarHTML = `
     <aside class="sidebar">
-      
+      <img class="profile-img" src="https://web.maths.unsw.edu.au/~cbagshaw/pic.PNG" alt="Picture of Christian Bagshaw">
       <div class="profile-info">
         <h1 class="name">Christian Bagshaw</h1>
         <p class="title">PhD in Mathematics</p>
