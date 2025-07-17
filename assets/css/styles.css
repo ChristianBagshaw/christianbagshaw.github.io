@@ -60,7 +60,7 @@ body {
   height: fit-content;
   background: var(--card-bg);
   border-radius: var(--border-radius);
-  padding: 32px;
+  padding: 18px 16px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-light);
   backdrop-filter: blur(10px);
@@ -91,14 +91,14 @@ body {
 
 .profile-info {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .name {
   font-size: 24px;
   font-weight: 700;
   color: var(--primary-text);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -108,7 +108,7 @@ body {
 .title {
   font-size: 16px;
   color: var(--secondary-text);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-weight: 500;
 }
 
@@ -162,7 +162,7 @@ body {
 
 /* Sidebar Navigation - Updated for mobile fullscreen */
 .sidebar-nav {
-  padding: 24px 0;
+  padding: 12px 0;
   border-top: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
@@ -174,10 +174,10 @@ body {
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 16px 20px;
-  margin: 0 auto 20px;
+  padding: 8px 12px;
+  margin: 0 auto 10px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 13px;
   justify-content: space-between;
   align-items: center;
   box-shadow: var(--shadow-md);
@@ -526,14 +526,13 @@ body {
   }
   
   .profile-img {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 12px;
   }
-  
   .name {
     font-size: 28px;
   }
-
   /* Hide regular nav links on mobile */
   .nav-links:not(.nav-overlay .nav-links) {
     display: none !important;
