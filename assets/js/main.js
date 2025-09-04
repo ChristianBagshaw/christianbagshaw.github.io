@@ -58,8 +58,8 @@ function getCurrentPageName() {
   
   if (currentPath.includes('/Research/') || currentPath.endsWith('/Research')) {
     return 'Research';
-  } else if (currentPath.includes('/Code/') || currentPath.endsWith('/Code')) {
-    return 'Code';
+  } else if (currentPath.includes('/Projects/') || currentPath.endsWith('/Projects')) {
+    return 'Projects';
   } else if (currentPath.includes('/Talks/') || currentPath.endsWith('/Talks')) {
     return 'Talks';
   } else if (currentPath.includes('/Teaching/') || currentPath.endsWith('/Teaching')) {
@@ -75,12 +75,12 @@ function createSidebar() {
 
   // Detect if we're in a subfolder by checking the current path
   const currentPath = window.location.pathname;
-  const isInSubfolder = currentPath.includes('/Research/') || currentPath.includes('/Code/') || currentPath.includes('/Talks/') || currentPath.includes('/Teaching/');
+  const isInSubfolder = currentPath.includes('/Research/') || currentPath.includes('/Projects/') || currentPath.includes('/Talks/') || currentPath.includes('/Teaching/');
 
   // Adjust paths based on folder location
   const homeLink = isInSubfolder ? '../index.html' : 'index.html';
   const researchLink = isInSubfolder ? (currentPath.includes('/Research/') ? 'index.html' : '../Research/index.html') : 'Research/index.html';
-  const codeLink = isInSubfolder ? (currentPath.includes('/Code/') ? 'index.html' : '../Code/index.html') : 'Code/index.html';
+  const projectsLink = isInSubfolder ? (currentPath.includes('/Projects/') ? 'index.html' : '../Projects/index.html') : 'Projects/index.html';
   const talksLink = isInSubfolder ? (currentPath.includes('/Talks/') ? 'index.html' : '../Talks/index.html') : 'Talks/index.html';
   const teachingLink = isInSubfolder ? (currentPath.includes('/Teaching/') ? 'index.html' : '../Teaching/index.html') : 'Teaching/index.html';
 
@@ -129,7 +129,7 @@ function createSidebar() {
         <div class="nav-links" id="navLinks">
           <a href="${homeLink}" class="nav-link">Home</a>
           <a href="${researchLink}" class="nav-link">Research</a>
-          <a href="${codeLink}" class="nav-link">Code</a>
+          <a href="${projectsLink}" class="nav-link">Projects</a>
           <a href="${talksLink}" class="nav-link">Talks</a>
         </div>
       </nav>
@@ -141,7 +141,7 @@ function createSidebar() {
       <div class="nav-links">
         <a href="${homeLink}" class="nav-link" onclick="closeNav()">Home</a>
         <a href="${researchLink}" class="nav-link" onclick="closeNav()">Research</a>
-        <a href="${codeLink}" class="nav-link" onclick="closeNav()">Code</a>
+        <a href="${projectsLink}" class="nav-link" onclick="closeNav()">Projects</a>
         <a href="${talksLink}" class="nav-link" onclick="closeNav()">Talks</a>
       </div>
     </div>

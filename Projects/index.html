@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christian Bagshaw - Projects</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  
+  <!-- ADD THIS LINE: -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+
+<body>
+  <div class="container">
+          <!-- Sidebar -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Projects -->
+      <section class="card">
+        <h2 class="card-title">Fantasy Measure</h2>
+        <div class="card-content">
+          <p>
+            Trained an ensemble of tree-based models (XGBoost and NGBoost) on past NFL data to predict fantasy football outcomes. Built tools to run Monte Carlo simulations to better understand outcomes and help with decision making in fantasy football.
+          </p>
+          <p>
+            Check out the <a href="https://www.instagram.com/fantasymeasure?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank">Fantasy Measure Instagram</a> for insights.
+          </p>
+        </div>
+      </section>
+      <section class="card">
+        <h2 class="card-title">High p-Rank</h2>
+        <div class="card-content">
+          <p>
+            <a href="https://github.com/ChristianBagshaw/Improved-methods-for-finding-imaginary-quadratic-fields-with-high-n-rank" target="_blank">Here</a>
+            you can find implementations of the algorithms we developed in the paper
+            <em>Improved methods for finding imaginary quadratic fields with high n-rank</em>.
+            For a given prime <code>p</code>, these can be used for very rapid generation of discriminants of quadratic number fields with p-rank at least 2.
+          </p>
+        </div>
+      </section>
+      <section class="card">
+        <h2 class="card-title">Square-free Smooth Polynomials in Residue Classes</h2>
+        <div class="card-content">
+          <p>
+            <a href="https://github.com/ChristianBagshaw/squarefree_smooth_polynomials" target="_blank">Here</a>
+            you can find the code used to complete the proof of Theorem 1.1 in the paper
+            <em>Square-free smooth polynomials in residue classes and generators of irreducible polynomials</em>.
+            The algorithm takes as input a prime power q and a positive integer n. Then for each irreducible polynomial f of degree n over the finite field of order q, the code searches for a square-free representative for each residue class modulo f with no factors of degree equal to or exceeding the degree of f.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>
