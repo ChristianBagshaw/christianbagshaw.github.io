@@ -83,12 +83,11 @@ function createSidebar() {
   const projectsLink = isInSubfolder ? (currentPath.includes('/Projects/') ? 'index.html' : '../Projects/index.html') : 'Projects/index.html';
   const talksLink = isInSubfolder ? (currentPath.includes('/Talks/') ? 'index.html' : '../Talks/index.html') : 'Talks/index.html';
   const teachingLink = isInSubfolder ? (currentPath.includes('/Teaching/') ? 'index.html' : '../Teaching/index.html') : 'Teaching/index.html';
-
-  const currentPageName = getCurrentPageName();
+  const profileImage = isInSubfolder ? '../assets/img/profile.png' : 'assets/img/profile.png';
 
   const sidebarHTML = `
     <aside class="sidebar">
-      <img class="profile-img" src="https://web.maths.unsw.edu.au/~cbagshaw/pic.PNG" alt="Picture of Christian Bagshaw">
+      <img class="profile-img" src="${profileImage}" alt="Picture of Christian Bagshaw">
       <div class="profile-info">
         <h1 class="name">Christian Bagshaw</h1>
         <p class="title">PhD in Mathematics</p>
@@ -118,14 +117,6 @@ function createSidebar() {
       </div>
 
       <nav class="sidebar-nav">
-        <button class="nav-toggle" onclick="toggleNav()" id="navToggle">
-          ${currentPageName}
-          <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
         <div class="nav-links" id="navLinks">
           <a href="${homeLink}" class="nav-link">Home</a>
           <a href="${researchLink}" class="nav-link">Research</a>
@@ -134,17 +125,6 @@ function createSidebar() {
         </div>
       </nav>
     </aside>
-
-    <!-- Fullscreen navigation overlay -->
-    <div class="nav-overlay" id="navOverlay">
-      <button class="nav-close" onclick="closeNav()" aria-label="Close navigation">×</button>
-      <div class="nav-links">
-        <a href="${homeLink}" class="nav-link" onclick="closeNav()">Home</a>
-        <a href="${researchLink}" class="nav-link" onclick="closeNav()">Research</a>
-        <a href="${projectsLink}" class="nav-link" onclick="closeNav()">Projects</a>
-        <a href="${talksLink}" class="nav-link" onclick="closeNav()">Talks</a>
-      </div>
-    </div>
   `;
 
   sidebarContainer.innerHTML = sidebarHTML;
@@ -153,14 +133,13 @@ function createSidebar() {
 
 // Set active navigation link based on current page
 function setActiveNavLink() {
-  const currentPage = window.location.pathname;
+  const currentPageName = getCurrentPageName();
   const navLinks = document.querySelectorAll('.nav-link');
   
   navLinks.forEach(link => {
     link.classList.remove('active');
-    const href = link.getAttribute('href');
-    
-    if (currentPage.includes(href) || (currentPage === '/' && href === 'index.html')) {
+
+    if (link.textContent.trim() === currentPageName) {
       link.classList.add('active');
     }
   });
