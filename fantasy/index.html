@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christian Bagshaw - Fantasy Football Rankings</title>
+
+  <!-- Start data downloads during HTML parse, before app.js runs -->
+  <link rel="preload" as="fetch" href="manifest.json" crossorigin="anonymous">
+  <link rel="preload" as="fetch" href="overall/normal_12_ppr.json" crossorigin="anonymous">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Site + page CSS -->
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="fantasy.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+
+<body class="fm-page">
+  <div class="container">
+    <!-- Sidebar (injected by main.js) -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <section class="card fm-shell">
+
+        <!-- Header / metadata -->
+        <header class="fm-head">
+          <h1 class="fm-title" id="fmTitle">Fantasy Football Rankings</h1>
+          <p class="fm-modelnote">Read more about the models that produced these projections <a href="../Projects/index.html">here</a>.</p>
+          <p class="fm-subtitle" id="fmSubtitle">Loading…</p>
+          <div class="fm-meta" id="fmMeta"></div>
+        </header>
+
+        <!-- Controls -->
+        <div class="fm-controls">
+          <div class="fm-tabs" id="fmViewTabs" role="tablist" aria-label="Table view"></div>
+
+          <div class="fm-control-row">
+            <div class="fm-controlgroup">
+              <span class="fm-control-label">Scoring</span>
+              <div class="fm-seg" id="fmSegScoring" role="group" aria-label="Scoring"></div>
+            </div>
+
+            <div class="fm-overall-controls" id="fmOverallControls">
+              <div class="fm-controlgroup">
+                <span class="fm-control-label">Format</span>
+                <div class="fm-seg" id="fmSegFormat" role="group" aria-label="League format"></div>
+              </div>
+              <div class="fm-controlgroup">
+                <span class="fm-control-label">League size</span>
+                <div class="fm-seg" id="fmSegSize" role="group" aria-label="League size"></div>
+              </div>
+            </div>
+
+            <div class="fm-controlgroup fm-search-group">
+              <span class="fm-control-label">Search</span>
+              <input type="search" class="fm-search" id="fmSearch"
+                     placeholder="Player, team, or position" autocomplete="off" spellcheck="false">
+            </div>
+          </div>
+        </div>
+
+        <!-- Status bar -->
+        <div class="fm-statusbar">
+          <span class="fm-count" id="fmCount"></span>
+        </div>
+
+        <!-- Message / loading / error / missing state -->
+        <div class="fm-message is-hidden" id="fmMessage"></div>
+
+        <!-- Table -->
+        <div class="fm-tablewrap" id="fmTableWrap">
+          <table class="fm-table" id="fmTable"></table>
+        </div>
+
+        <!-- Methodology -->
+        <p class="fm-method">
+          Overall ranks use simulation-based value over replacement for the selected
+          format, league size, and scoring. Position tables show rest-of-season PPG
+          distributions and top-k finish probabilities. Part of the
+          <a href="../Projects/index.html">Fantasy Measure</a> modeling project.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Site JS (sidebar/nav) + app -->
+  <script src="../assets/js/main.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

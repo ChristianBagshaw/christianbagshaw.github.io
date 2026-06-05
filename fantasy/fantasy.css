@@ -1,0 +1,458 @@
+/* ============================================================
+   Fantasy Measure — Rankings Board styles
+   Built on the site's CSS variables (assets/css/styles.css).
+   Scoped with .fm- prefixes. Light, dense, scannable.
+   ============================================================ */
+
+:root {
+  --fm-good: rgba(96, 150, 116, 0.26);
+  --fm-good-strong: rgba(96, 150, 116, 0.5);
+  --fm-risk: rgba(192, 116, 104, 0.24);
+  --fm-zebra: rgba(20, 20, 20, 0.018);
+  --fm-row-hover: rgba(86, 93, 99, 0.09);
+}
+
+/* The fantasy page wants more horizontal room than prose pages. */
+.fm-page .container {
+  width: min(1240px, 100%);
+}
+
+/* ---- Shell ------------------------------------------------------------- */
+.fm-shell {
+  padding: clamp(18px, 2.4vw, 26px);
+}
+
+.fm-head {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+}
+
+.fm-title {
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 660;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.fm-modelnote {
+  margin-bottom: 8px;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.fm-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.fm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.meta-k {
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.meta-v {
+  color: var(--ink);
+  font-weight: 560;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+}
+
+/* ---- Controls ---------------------------------------------------------- */
+.fm-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.fm-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-soft);
+  align-self: flex-start;
+}
+
+.fm-tab {
+  appearance: none;
+  min-width: 64px;
+  padding: 7px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 560;
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+
+.fm-tab:hover {
+  color: var(--ink);
+}
+
+.fm-tab.is-active {
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
+  color: var(--accent-ink);
+  box-shadow: 0 1px 2px rgba(30, 32, 28, 0.08);
+}
+
+.fm-control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+}
+
+.fm-controlgroup {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fm-control-label {
+  font-size: 0.66rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-soft);
+  padding-left: 2px;
+}
+
+.fm-seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface-soft);
+}
+
+.fm-segbtn {
+  appearance: none;
+  padding: 6px 13px;
+  border: none;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 540;
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease);
+}
+
+.fm-segbtn:last-child { border-right: none; }
+.fm-segbtn:hover { color: var(--ink); }
+
+.fm-segbtn.is-active {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.fm-overall-controls {
+  display: inline-flex;
+  gap: 18px;
+  transition: opacity var(--ease);
+}
+
+.fm-overall-controls.is-muted {
+  opacity: 0.42;
+}
+
+.fm-search-group { margin-left: auto; }
+
+.fm-search {
+  width: clamp(180px, 22vw, 260px);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.fm-search::placeholder { color: var(--text-soft); }
+
+.fm-search:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(86, 93, 99, 0.12);
+}
+
+/* ---- Status bar -------------------------------------------------------- */
+.fm-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.fm-count {
+  font-weight: 560;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.fm-hint { font-style: italic; }
+
+/* ---- Table ------------------------------------------------------------- */
+.fm-tablewrap {
+  position: relative;
+  max-height: 72vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-raised);
+}
+
+.fm-tablewrap.is-hidden { display: none; }
+
+.fm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.82rem;
+}
+
+.fm-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 9px 10px;
+  background: var(--surface-tint);
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  font-weight: 620;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--ease), background var(--ease);
+}
+
+.fm-table thead th:hover { color: var(--ink); }
+
+.fm-table thead th.is-sorted {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+}
+
+.th-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.62rem;
+  color: var(--accent);
+}
+
+.fm-table tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.fm-table tbody tr:nth-child(even) td { background: var(--fm-zebra); }
+
+.fm-table tbody tr { transition: background var(--ease); }
+
+.fm-table tbody tr:hover td { background: var(--fm-row-hover); }
+
+.al-l { text-align: left; }
+.al-c { text-align: center; }
+.al-r { text-align: right; }
+
+.num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+}
+
+.col-player { min-width: 168px; }
+.player-name { font-weight: 560; color: var(--ink); }
+
+.col-team { width: 1%; }
+
+.team-tag {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+.team-fa { color: var(--text-soft); font-style: italic; }
+
+.range .range-sep { color: var(--text-soft); margin: 0 1px; }
+
+/* Position chips */
+.pos-chip {
+  display: inline-block;
+  min-width: 30px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.pos-QB { background: rgba(196, 122, 92, 0.16); color: #9a5836; border-color: rgba(196,122,92,.28); }
+.pos-RB { background: rgba(90, 150, 110, 0.16); color: #3f7a53; border-color: rgba(90,150,110,.28); }
+.pos-WR { background: rgba(96, 128, 178, 0.16); color: #4a648f; border-color: rgba(96,128,178,.28); }
+.pos-TE { background: rgba(168, 130, 78, 0.18); color: #856231; border-color: rgba(168,130,78,.3); }
+
+/* Tier badges */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 680;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+}
+.tier-1 { background: #e7efe7; border-color: #c2d6c4; color: #386046; }
+.tier-2 { background: #e9eef3; border-color: #c6d3df; color: #46648f; }
+.tier-3 { background: #f2eee6; border-color: #ddd2bd; color: #7a6433; }
+.tier-4 { background: #f1ece9; border-color: #d9cbc4; color: #8a5d4d; }
+.tier-5 { background: #efeaf0; border-color: #d6c9d8; color: #6f5479; }
+.tier-6 { background: #ededed; border-color: #d2d2d2; color: #5d5d5d; }
+
+/* Injury / UFA chips */
+.chip {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+  border: 1px solid transparent;
+}
+.chip-inj { background: #f6e7c8; color: #8a6a1f; border-color: #e6d3a3; }
+.chip-out, .chip-ir { background: #f3d8d4; color: #9a3b2e; border-color: #e6bbb3; }
+.chip-ufa { background: var(--surface-soft); color: var(--text-soft); border-color: var(--line); }
+
+/* Probability micro-bars */
+.probwrap {
+  position: relative;
+  display: inline-block;
+  min-width: 52px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.probwrap::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--p, 0) * 100%);
+  border-radius: 4px;
+}
+.probwrap-good::before { background: var(--fm-good); }
+.probwrap-risk::before { background: var(--fm-risk); }
+.probval { position: relative; }
+
+/* ---- Messages (loading / empty / missing / error) --------------------- */
+.fm-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 220px;
+  padding: 40px 20px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
+  text-align: center;
+}
+.fm-message.is-hidden { display: none; }
+.fm-message .msg-title {
+  font-size: 1rem;
+  font-weight: 640;
+  color: var(--ink);
+}
+.fm-message p { font-size: 0.9rem; max-width: 42ch; }
+.fm-message-error { border-color: #e0b6ad; background: #faf1ef; }
+
+.fm-spinner {
+  width: 26px;
+  height: 26px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: fm-spin 0.7s linear infinite;
+}
+@keyframes fm-spin { to { transform: rotate(360deg); } }
+
+.fm-emptyrow {
+  padding: 40px 16px !important;
+  text-align: center;
+  color: var(--text-soft);
+  font-style: italic;
+}
+
+/* ---- Method note ------------------------------------------------------- */
+.fm-method {
+  margin-top: 14px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  max-width: 80ch;
+}
+
+/* ---- Responsive -------------------------------------------------------- */
+@media (max-width: 768px) {
+  .fm-shell { padding: 16px; }
+  .fm-control-row { gap: 10px; }
+  .fm-search-group { margin-left: 0; width: 100%; }
+  .fm-search { width: 100%; }
+  .fm-overall-controls { gap: 10px; flex-wrap: wrap; }
+  .fm-tablewrap { max-height: none; }
+}

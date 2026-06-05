@@ -1,0 +1,307 @@
+{
+  "anchor_week": 1,
+  "datasets": {
+    "overall": [
+      {
+        "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_8_ppr",
+        "kind": "overall_rankings",
+        "league_size": 8,
+        "path": "overall/normal_8_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_8_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_10_ppr",
+        "kind": "overall_rankings",
+        "league_size": 10,
+        "path": "overall/normal_10_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_10_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_12_ppr",
+        "kind": "overall_rankings",
+        "league_size": 12,
+        "path": "overall/normal_12_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_12_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_8_ppr",
+        "kind": "overall_rankings",
+        "league_size": 8,
+        "path": "overall/superflex_8_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_8_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_10_ppr",
+        "kind": "overall_rankings",
+        "league_size": 10,
+        "path": "overall/superflex_10_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_10_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_12_ppr",
+        "kind": "overall_rankings",
+        "league_size": 12,
+        "path": "overall/superflex_12_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_12_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_8_standard",
+        "kind": "overall_rankings",
+        "league_size": 8,
+        "path": "overall/normal_8_standard.json",
+        "rows": 150,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_8_standard/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_10_standard",
+        "kind": "overall_rankings",
+        "league_size": 10,
+        "path": "overall/normal_10_standard.json",
+        "rows": 150,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_10_standard/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_12_standard",
+        "kind": "overall_rankings",
+        "league_size": 12,
+        "path": "overall/normal_12_standard.json",
+        "rows": 150,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_12_standard/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_8_standard",
+        "kind": "overall_rankings",
+        "league_size": 8,
+        "path": "overall/superflex_8_standard.json",
+        "rows": 150,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_8_standard/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_10_standard",
+        "kind": "overall_rankings",
+        "league_size": 10,
+        "path": "overall/superflex_10_standard.json",
+        "rows": 150,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_10_standard/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_12_standard",
+        "kind": "overall_rankings",
+        "league_size": 12,
+        "path": "overall/superflex_12_standard.json",
+        "rows": 150,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_12_standard/global_rankings.csv",
+        "top_n": 150
+      }
+    ],
+    "positions": [
+      {
+        "anchor_week": 1,
+        "key": "ppr_QB",
+        "kind": "position_rankings",
+        "path": "positions/ppr/QB.json",
+        "position": "QB",
+        "rows": 32,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=standard/shock=true/QB.csv",
+        "source_scoring": "standard",
+        "top_n": 32
+      },
+      {
+        "anchor_week": 1,
+        "key": "ppr_RB",
+        "kind": "position_rankings",
+        "path": "positions/ppr/RB.json",
+        "position": "RB",
+        "rows": 72,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=ppr/shock=true/RB.csv",
+        "source_scoring": "ppr",
+        "top_n": 72
+      },
+      {
+        "anchor_week": 1,
+        "key": "ppr_WR",
+        "kind": "position_rankings",
+        "path": "positions/ppr/WR.json",
+        "position": "WR",
+        "rows": 84,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=ppr/shock=true/WR.csv",
+        "source_scoring": "ppr",
+        "top_n": 84
+      },
+      {
+        "anchor_week": 1,
+        "key": "ppr_TE",
+        "kind": "position_rankings",
+        "path": "positions/ppr/TE.json",
+        "position": "TE",
+        "rows": 36,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=ppr/shock=true/TE.csv",
+        "source_scoring": "ppr",
+        "top_n": 36
+      },
+      {
+        "anchor_week": 1,
+        "key": "standard_QB",
+        "kind": "position_rankings",
+        "path": "positions/standard/QB.json",
+        "position": "QB",
+        "rows": 32,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=standard/shock=true/QB.csv",
+        "source_scoring": "standard",
+        "top_n": 32
+      },
+      {
+        "anchor_week": 1,
+        "key": "standard_RB",
+        "kind": "position_rankings",
+        "path": "positions/standard/RB.json",
+        "position": "RB",
+        "rows": 72,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=standard/shock=true/RB.csv",
+        "source_scoring": "standard",
+        "top_n": 72
+      },
+      {
+        "anchor_week": 1,
+        "key": "standard_WR",
+        "kind": "position_rankings",
+        "path": "positions/standard/WR.json",
+        "position": "WR",
+        "rows": 84,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=standard/shock=true/WR.csv",
+        "source_scoring": "standard",
+        "top_n": 84
+      },
+      {
+        "anchor_week": 1,
+        "key": "standard_TE",
+        "kind": "position_rankings",
+        "path": "positions/standard/TE.json",
+        "position": "TE",
+        "rows": 36,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/ros/season=2026/anchor_week=1/scoring=standard/shock=true/TE.csv",
+        "source_scoring": "standard",
+        "top_n": 36
+      }
+    ]
+  },
+  "defaults": {
+    "format": "normal",
+    "league_size": 12,
+    "position": "Overall",
+    "scoring": "ppr",
+    "use_shock": true
+  },
+  "generated_at_utc": "2026-06-05T03:42:03.770331+00:00",
+  "missing_artifacts": [],
+  "notes": [
+    "Overall rankings are cross-position draft-value boards from ROS simulation VORP.",
+    "Position rankings are ROS simulation boards sorted within position with top-k finish probabilities.",
+    "QB is a single-scoring position in the model pipeline; PPR and standard website lenses may share the same QB source artifact."
+  ],
+  "options": {
+    "formats": [
+      "normal",
+      "superflex"
+    ],
+    "league_sizes": [
+      8,
+      10,
+      12
+    ],
+    "positions": [
+      "QB",
+      "RB",
+      "WR",
+      "TE"
+    ],
+    "scorings": [
+      "ppr",
+      "standard"
+    ]
+  },
+  "schema_version": 1,
+  "season": 2026,
+  "title": "2026 NFL Fantasy Football - Projections and Rankings"
+}

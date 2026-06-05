@@ -64,6 +64,8 @@ function getCurrentPageName() {
     return 'Talks';
   } else if (currentPath.includes('/Teaching/') || currentPath.endsWith('/Teaching')) {
     return 'Teaching';
+  } else if (currentPath.includes('/fantasy/') || currentPath.endsWith('/fantasy')) {
+    return 'NFL Models';
   } else {
     return 'Home';
   }
@@ -75,7 +77,7 @@ function createSidebar() {
 
   // Detect if we're in a subfolder by checking the current path
   const currentPath = window.location.pathname;
-  const isInSubfolder = currentPath.includes('/Research/') || currentPath.includes('/Projects/') || currentPath.includes('/Talks/') || currentPath.includes('/Teaching/');
+  const isInSubfolder = currentPath.includes('/Research/') || currentPath.includes('/Projects/') || currentPath.includes('/Talks/') || currentPath.includes('/Teaching/') || currentPath.includes('/fantasy/');
 
   // Adjust paths based on folder location
   const homeLink = isInSubfolder ? '../index.html' : 'index.html';
@@ -83,6 +85,7 @@ function createSidebar() {
   const projectsLink = isInSubfolder ? (currentPath.includes('/Projects/') ? 'index.html' : '../Projects/index.html') : 'Projects/index.html';
   const talksLink = isInSubfolder ? (currentPath.includes('/Talks/') ? 'index.html' : '../Talks/index.html') : 'Talks/index.html';
   const teachingLink = isInSubfolder ? (currentPath.includes('/Teaching/') ? 'index.html' : '../Teaching/index.html') : 'Teaching/index.html';
+  const fantasyLink = isInSubfolder ? (currentPath.includes('/fantasy/') ? 'index.html' : '../fantasy/index.html') : 'fantasy/index.html';
   const profileImage = isInSubfolder ? '../assets/img/profile.png' : 'assets/img/profile.png';
 
   const sidebarHTML = `
@@ -122,6 +125,7 @@ function createSidebar() {
           <a href="${researchLink}" class="nav-link">Research</a>
           <a href="${projectsLink}" class="nav-link">Projects</a>
           <a href="${talksLink}" class="nav-link">Talks</a>
+          <a href="${fantasyLink}" class="nav-link" style="grid-column: 1 / -1;">NFL Models</a>
         </div>
       </nav>
     </aside>
