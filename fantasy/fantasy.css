@@ -472,8 +472,11 @@
 
   .fm-statusbar { justify-content: center; }
 
+  /* The table is scaled with transform:scale (see fitTable in app.js). The
+     transformed element keeps its full-width layout box, so clip the empty
+     overflow on the right; fitTable pins the wrapper to the scaled height. */
   .fm-tablewrap {
     max-height: none;
-    overflow: visible;   /* the scaled table fits, so no inner scroll needed */
+    overflow: hidden;
   }
 }

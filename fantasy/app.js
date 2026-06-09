@@ -418,20 +418,40 @@
     fitTable();
   }
 
-  // On narrow (mobile) viewports, scale the whole table down with `zoom` so all
-  // columns fit the available width — no horizontal scroll, no layout reflow of
-  // the columns themselves. On wider screens the table renders at full size.
+  // On narrow (mobile) viewports, scale the whole table down so every column
+  // fits the available width — no horizontal scroll. Uses transform:scale
+  // (universally supported, unlike `zoom`) and reserves only the scaled height
+  // on the wrapper so there's no empty space below. Full size on wider screens.
   function fitTable() {
     if (!el.table || !el.tableWrap) return;
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    el.table.style.zoom = "";                 // reset, then measure natural size
+    // Reset before measuring the table's natural (unscaled) size.
+    el.table.style.transform = "";
+    el.table.style.transformOrigin = "";
+    el.tableWrap.style.height = "";
     if (!isMobile) return;
-    const natural = el.table.offsetWidth;
+
     const avail = el.tableWrap.clientWidth;
-    if (natural > avail && natural > 0) {
-      // small safety margin so sub-pixel rounding can't trigger overflow
-      el.table.style.zoom = String(Math.max(0.4, (avail / natural) * 0.985));
+    // getBoundingClientRect gives sub-pixel width (offsetWidth rounds down,
+    // which can leave the table a hair too wide once scaled).
+    const natural = el.table.getBoundingClientRect().width;
+    if (natural <= avail || natural <= 0) return;
+
+    let scale = (avail / natural) * 0.99;
+    el.table.style.transformOrigin = "top left";
+    el.table.style.transform = `scale(${scale})`;
+
+    // Verify against the ACTUAL rendered width and correct once if still over —
+    // covers measurement/rounding/text-rendering discrepancies on real devices.
+    const rendered = el.table.getBoundingClientRect().width;
+    if (rendered > avail) {
+      scale = Math.max(0.4, scale * (avail / rendered) * 0.99);
+      el.table.style.transform = `scale(${scale})`;
     }
+
+    // Pin the wrapper to the scaled height (the transformed element keeps its
+    // full unscaled layout box, which would otherwise reserve empty space).
+    el.tableWrap.style.height = Math.ceil(el.table.getBoundingClientRect().height) + "px";
   }
 
   // ---- Main render cycle --------------------------------------------------

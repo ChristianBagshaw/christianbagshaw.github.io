@@ -28,6 +28,10 @@
 html {
   scroll-behavior: smooth;
   background: var(--bg);
+  /* Stop iOS Safari / Android Chrome from auto-inflating text on "wide"
+     content — it widens the fantasy table beyond what fitTable() measures. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
