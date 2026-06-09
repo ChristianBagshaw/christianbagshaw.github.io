@@ -365,7 +365,9 @@ code {
 
   .container {
     min-height: calc(100vh - 28px);
-    grid-template-columns: 1fr;
+    /* minmax(0, …) (not plain 1fr) so a wide child — e.g. the fantasy
+       rankings table — can't blow the single column past the viewport. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
 

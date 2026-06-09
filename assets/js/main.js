@@ -65,7 +65,7 @@ function getCurrentPageName() {
   } else if (currentPath.includes('/Teaching/') || currentPath.endsWith('/Teaching')) {
     return 'Teaching';
   } else if (currentPath.includes('/fantasy/') || currentPath.endsWith('/fantasy')) {
-    return 'NFL Models';
+    return 'Fantasy Football Projections';
   } else {
     return 'Home';
   }
@@ -125,7 +125,7 @@ function createSidebar() {
           <a href="${researchLink}" class="nav-link">Research</a>
           <a href="${projectsLink}" class="nav-link">Projects</a>
           <a href="${talksLink}" class="nav-link">Talks</a>
-          <a href="${fantasyLink}" class="nav-link" style="grid-column: 1 / -1;">NFL Models</a>
+          <a href="${fantasyLink}" class="nav-link" style="grid-column: 1 / -1;">Fantasy Football Projections</a>
         </div>
       </nav>
     </aside>

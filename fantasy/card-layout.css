@@ -1,0 +1,185 @@
+/* ============================================================
+   Fantasy Measure — Mobile CARD layout (PARKED / NOT LOADED)
+   ------------------------------------------------------------
+   This is the experimental phone layout that turned each table
+   row into a stacked card. It is intentionally NOT linked from
+   index.html — the live page uses a zoom-to-fit full table on
+   mobile instead. Kept here in case we want to revisit cards.
+
+   DEPENDENCIES (these were reverted out of app.js when parking):
+     1. Each <td> needs  data-col="<key>"  and  data-label="<Label>"
+        attributes (data-label feeds the ::before stat labels).
+     2. A zero-height break cell  <td class="fm-rowbreak">  must be
+        injected before the first stat column in each row, so the
+        stats wrap onto their own line below the player header.
+     3. Because the column headers are hidden in this layout, the
+        mobile sort <select> + direction toggle (.fm-sortbar) was
+        added to the status bar to keep sorting usable.
+   To re-enable: restore those bits in app.js + the .fm-sortbar
+   markup in index.html, then <link> this file after fantasy.css.
+   ============================================================ */
+
+/* Mobile sort control — hidden on desktop, revealed in the card layout */
+.fm-sortbar {
+  display: none;
+  align-items: center;
+  gap: 7px;
+}
+
+.fm-sortselect {
+  max-width: 48vw;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.fm-sortdir {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease);
+}
+.fm-sortdir:hover { color: var(--ink); border-color: var(--line-strong); }
+
+/* Mobile-only line break inside cards; removed entirely on desktop tables. */
+.fm-rowbreak { display: none; }
+
+/* Phone: the 8–10 column table won't fit, so each row becomes a card.
+   Header line = rank · player · team; below it, chips and labeled stats. */
+@media (max-width: 640px) {
+  .fm-statusbar { flex-wrap: wrap; gap: 8px; }
+  .fm-sortbar { display: inline-flex; }
+
+  /* Unwrap the table into a stream of block-level cards */
+  .fm-tablewrap {
+    max-height: none;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+  .fm-table { display: block; font-size: 0.86rem; }
+  .fm-table thead { display: none; }
+  .fm-table tbody { display: block; }
+
+  .fm-table tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-bottom: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-raised);
+    box-shadow: 0 1px 2px rgba(30, 32, 28, 0.04);
+  }
+  .fm-table tbody tr:last-child { margin-bottom: 0; }
+
+  /* Reset desktop cell chrome (borders, nowrap) inside cards */
+  .fm-table tbody td {
+    display: block;
+    padding: 0;
+    border: none;
+    white-space: normal;
+    background: transparent;
+    text-align: left;
+  }
+  /* Neutralize desktop zebra/hover backgrounds — background only, so it can't
+     clobber the display:flex on stat cells via higher specificity. */
+  .fm-table tbody tr:nth-child(even) td,
+  .fm-table tbody tr:hover td {
+    background: transparent;
+  }
+
+  /* --- Header line: rank · player · team · pos · pos-rank · tier --- */
+  .fm-table td[data-col="overall_rank"],
+  .fm-table td[data-col="rank"] {
+    flex: 0 0 auto;
+    order: 0;
+    min-width: 1.5em;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .fm-table td[data-col="player_name"] {
+    flex: 0 1 auto;
+    order: 1;
+    min-width: 0;            /* drop the desktop .col-player 168px reservation */
+    margin-right: 2px;
+    font-size: 0.98rem;
+  }
+  .fm-table td.col-team { width: auto; }
+  .fm-table td[data-col="team"] { flex: 0 0 auto; order: 2; }
+  .fm-table td[data-col="position"] { flex: 0 0 auto; order: 3; }
+  .fm-table td[data-col="position_rank_label"] {
+    flex: 0 0 auto;
+    order: 4;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+  .fm-table td[data-col="tier"] { flex: 0 0 auto; order: 5; }
+  .fm-table td[data-col="tier"]::before {
+    content: "Tier ";
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+  }
+
+  /* Full-width zero-height break: forces the stat strip onto its own line,
+     directly below the player header, regardless of how wide the screen is. */
+  .fm-table tbody td.fm-rowbreak {
+    display: block;
+    order: 5;
+    flex-basis: 100%;
+    height: 0;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* --- Stat strip: labeled numeric blocks, on their own line below the header --- */
+  .fm-table td[data-col="projected_ppg"],
+  .fm-table td[data-col="value"],
+  .fm-table td[data-col="top12_prob"],
+  .fm-table td[data-col="top24_prob"],
+  .fm-table td[data-col="top36_prob"] {
+    order: 6;
+    flex: 0 0 auto;
+    min-width: 3.4em;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .fm-table td[data-col="projected_ppg"]::before,
+  .fm-table td[data-col="value"]::before,
+  .fm-table td[data-col="top12_prob"]::before,
+  .fm-table td[data-col="top24_prob"]::before,
+  .fm-table td[data-col="top36_prob"]::before {
+    content: attr(data-label);
+    font-size: 0.6rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+  }
+
+  .fm-emptyrow {
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+}

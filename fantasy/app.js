@@ -134,8 +134,6 @@
   const OVERALL_COLUMNS = [
     { key: "overall_rank", label: "Rank", align: "c", sortKey: "overall_rank",
       render: (r) => formatNumber(r.overall_rank, 0) },
-    { key: "tier", label: "Tier", align: "c", sortKey: "tier",
-      render: (r) => tierBadge(r.tier) },
     { key: "player_name", label: "Player", align: "l", sortKey: "player_name", cls: "col-player",
       render: (r) => playerCell(r) },
     { key: "team", label: "Team", align: "c", sortKey: "team", cls: "col-team",
@@ -298,6 +296,12 @@
     state.sortDir = "asc";
   }
 
+  // Sensible default direction for a freshly-picked sort column:
+  // ascending for rank/name/team/position, descending for stats.
+  function defaultDirFor(key) {
+    return /rank|player_name|team|position$/.test(key) ? "asc" : "desc";
+  }
+
   // ---- Rendering: controls ------------------------------------------------
   function renderControls() {
     const isOverall = state.view === "Overall";
@@ -348,9 +352,9 @@
     // Subtitle
     let sub;
     if (state.view === "Overall") {
-      sub = `Preseason ROS simulation board · ${state.league_size}-team ${SCORING_LABEL[state.scoring]} · ${FORMAT_LABEL[state.format]}`;
+      sub = `Draft Rankings · ${state.league_size}-team ${SCORING_LABEL[state.scoring]} · ${FORMAT_LABEL[state.format]}`;
     } else {
-      sub = `${state.view} position board · ${SCORING_LABEL[state.scoring]} · ROS PPG distributions & finish odds`;
+      sub = `${state.view} Rankings · ${SCORING_LABEL[state.scoring]} · Projections`;
     }
     el.fmSubtitle.textContent = sub;
   }
@@ -410,6 +414,24 @@
     el.fmCount.textContent = state.q
       ? `Showing ${showing} of ${total} players`
       : `Showing ${showing} player${showing === 1 ? "" : "s"}`;
+
+    fitTable();
+  }
+
+  // On narrow (mobile) viewports, scale the whole table down with `zoom` so all
+  // columns fit the available width — no horizontal scroll, no layout reflow of
+  // the columns themselves. On wider screens the table renders at full size.
+  function fitTable() {
+    if (!el.table || !el.tableWrap) return;
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    el.table.style.zoom = "";                 // reset, then measure natural size
+    if (!isMobile) return;
+    const natural = el.table.offsetWidth;
+    const avail = el.tableWrap.clientWidth;
+    if (natural > avail && natural > 0) {
+      // small safety margin so sub-pixel rounding can't trigger overflow
+      el.table.style.zoom = String(Math.max(0.4, (avail / natural) * 0.985));
+    }
   }
 
   // ---- Main render cycle --------------------------------------------------
@@ -500,10 +522,16 @@
         state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = key;
-        // sensible default direction: descending for value/prob/ppg, ascending for rank/name
-        state.sortDir = /rank|player_name|team|position$/.test(key) ? "asc" : "desc";
+        state.sortDir = defaultDirFor(key);
       }
       renderTable();
+    });
+
+    // Re-fit the table when the viewport changes (rotation, resize, etc.)
+    let resizeRaf = 0;
+    window.addEventListener("resize", () => {
+      cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(fitTable);
     });
 
     window.addEventListener("popstate", () => {

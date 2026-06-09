@@ -32,10 +32,11 @@
       <section class="card">
         <h2 class="card-title">Fantasy Football Models</h2>
         <div class="card-content">
+<p>
+  I love fantasy football, so I've spent a lot of time building models to predict player outcomes. The pipeline produces a full weekly scoring distribution for every player: tree models estimate the mean and variance, and a flexible distribution family captures the shape, with parameters that adapt to the player's projected scoring level. Those distributions feed a Monte Carlo simulation that correlates same-game players and layers in persistent season-long mean shifts to model injuries, role changes, and hot streaks. The output is calibrated outcome ranges, finish probabilities, and value-over-replacement draft rankings.
+</p>
           <p>
-Built a full probabilistic modelling pipeline to predict player outcomes in NFL fantasy football. It uses gradient-boosted tree models to estimate the mean, variance, and shape of every player's weekly scoring distribution=. Those distributions feed a Monte Carlo simulation that accounts for week-to-week correlations and season-long shifts, producing calibrated outcome ranges, finish probabilities, and value-over-replacement draft rankings.          </p>
-          <p>
-            Explore the <a href="../fantasy/index.html">2026 rankings board</a> of projections for the upcoming season. This will hopefully be moved to a more permanent location in the future, but for now you can find it here.
+            Explore the <a href="../fantasy/index.html">2026 rankings board</a> of projections for the upcoming season. This will hopefully be moved to a more permanent location in the future, but for now you can find it here. A brief reminder that these projections are NOT my opinions, they are purely the output of a statistical model with no human adjustment.
           </p>
         </div>
       </section>

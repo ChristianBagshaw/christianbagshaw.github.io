@@ -448,11 +448,32 @@
 }
 
 /* ---- Responsive -------------------------------------------------------- */
+
+/* Mobile: keep the full desktop table, but scale it down to fit the viewport
+   width (handled by fitTable() in app.js, which sets `zoom` on .fm-table).
+   The sidebar / name / tabs above are left untouched. The table is shown
+   whole and the page scrolls vertically rather than the table scrolling. */
 @media (max-width: 768px) {
   .fm-shell { padding: 16px; }
-  .fm-control-row { gap: 10px; }
+
+  /* Center everything above the table (header text, meta chips, tabs,
+     controls, status) — the table itself stays left-aligned/scaled. */
+  .fm-head { text-align: center; }
+  .fm-meta { justify-content: center; }
+  .fm-tabs { align-self: center; }
+
+  .fm-control-row { gap: 10px; justify-content: center; }
+  .fm-controlgroup { align-items: center; }
+  .fm-control-label { padding-left: 0; }
+  .fm-overall-controls { gap: 10px; flex-wrap: wrap; justify-content: center; }
+
   .fm-search-group { margin-left: 0; width: 100%; }
   .fm-search { width: 100%; }
-  .fm-overall-controls { gap: 10px; flex-wrap: wrap; }
-  .fm-tablewrap { max-height: none; }
+
+  .fm-statusbar { justify-content: center; }
+
+  .fm-tablewrap {
+    max-height: none;
+    overflow: visible;   /* the scaled table fits, so no inner scroll needed */
+  }
 }
