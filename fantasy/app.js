@@ -534,6 +534,15 @@
       resizeRaf = requestAnimationFrame(fitTable);
     });
 
+    // The initial fit happens with fallback fonts; once the web fonts (Inter /
+    // JetBrains Mono) load, the table gets wider, so re-measure. On a real phone
+    // the fonts arrive over the network after first render — without this the
+    // table is under-scaled and overflows on the right.
+    window.addEventListener("load", fitTable);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(fitTable);
+    }
+
     window.addEventListener("popstate", () => {
       readUrlState();
       resetSortForView();
