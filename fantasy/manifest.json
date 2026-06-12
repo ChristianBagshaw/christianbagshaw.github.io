@@ -43,6 +43,19 @@
       },
       {
         "anchor_week": 1,
+        "format": "normal",
+        "key": "normal_32_ppr",
+        "kind": "overall_rankings",
+        "league_size": 32,
+        "path": "overall/normal_32_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=normal_32_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
         "format": "superflex",
         "key": "superflex_8_ppr",
         "kind": "overall_rankings",
@@ -78,6 +91,19 @@
         "scoring": "ppr",
         "season": 2026,
         "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_12_ppr/global_rankings.csv",
+        "top_n": 150
+      },
+      {
+        "anchor_week": 1,
+        "format": "superflex",
+        "key": "superflex_32_ppr",
+        "kind": "overall_rankings",
+        "league_size": 32,
+        "path": "overall/superflex_32_ppr.json",
+        "rows": 150,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/rankings/ros/season=2026/anchor_week=1/mode=superflex_32_ppr/global_rankings.csv",
         "top_n": 150
       },
       {
@@ -273,7 +299,7 @@
     "scoring": "ppr",
     "use_shock": true
   },
-  "generated_at_utc": "2026-06-05T03:42:03.770331+00:00",
+  "generated_at_utc": "2026-06-12T09:50:36.438093+00:00",
   "missing_artifacts": [],
   "notes": [
     "Overall rankings are cross-position draft-value boards from ROS simulation VORP.",
@@ -288,7 +314,8 @@
     "league_sizes": [
       8,
       10,
-      12
+      12,
+      32
     ],
     "positions": [
       "QB",
@@ -303,5 +330,5 @@
   },
   "schema_version": 1,
   "season": 2026,
-  "title": "2026 NFL Fantasy - Projections and Rankings"
+  "title": "2026 Fantasy Football Rankings"
 }

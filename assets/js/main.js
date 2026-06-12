@@ -55,19 +55,19 @@ function showToast(message, type = 'default') {
 
 function getCurrentPageName() {
   const currentPath = window.location.pathname;
-  
+
   if (currentPath.includes('/Research/') || currentPath.endsWith('/Research')) {
-    return 'Research';
+    return 'research';
   } else if (currentPath.includes('/Projects/') || currentPath.endsWith('/Projects')) {
-    return 'Projects';
+    return 'projects';
   } else if (currentPath.includes('/Talks/') || currentPath.endsWith('/Talks')) {
-    return 'Talks';
+    return 'talks';
   } else if (currentPath.includes('/Teaching/') || currentPath.endsWith('/Teaching')) {
-    return 'Teaching';
+    return 'teaching';
   } else if (currentPath.includes('/fantasy/') || currentPath.endsWith('/fantasy')) {
-    return 'Fantasy Football Projections';
+    return 'fantasy';
   } else {
-    return 'Home';
+    return 'home';
   }
 }
 
@@ -121,11 +121,11 @@ function createSidebar() {
 
       <nav class="sidebar-nav">
         <div class="nav-links" id="navLinks">
-          <a href="${homeLink}" class="nav-link">Home</a>
-          <a href="${researchLink}" class="nav-link">Research</a>
-          <a href="${projectsLink}" class="nav-link">Projects</a>
-          <a href="${talksLink}" class="nav-link">Talks</a>
-          <a href="${fantasyLink}" class="nav-link" style="grid-column: 1 / -1;">Fantasy Football Projections</a>
+          <a href="${homeLink}" class="nav-link" data-page="home">Home</a>
+          <a href="${researchLink}" class="nav-link" data-page="research">Research</a>
+          <a href="${projectsLink}" class="nav-link" data-page="projects">Projects</a>
+          <a href="${talksLink}" class="nav-link" data-page="talks">Talks</a>
+          <a href="${fantasyLink}" class="nav-link" data-page="fantasy" style="grid-column: 1 / -1;">Fantasy Football Projections</a>
         </div>
       </nav>
     </aside>
@@ -143,7 +143,7 @@ function setActiveNavLink() {
   navLinks.forEach(link => {
     link.classList.remove('active');
 
-    if (link.textContent.trim() === currentPageName) {
+    if (link.dataset.page === currentPageName) {
       link.classList.add('active');
     }
   });

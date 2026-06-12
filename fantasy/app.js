@@ -131,6 +131,15 @@
 
   // ---- Column definitions -------------------------------------------------
   // align: l|c|r  · sortKey: raw field used for sorting · render(row, ctx)
+
+  // Sorts on injury_3plus_prob (the raw signal behind the meter) so ordering
+  // is stable within a level instead of alphabetical on the label.
+  const INJURY_RISK_COLUMN = {
+    key: "injury_risk", label: "Inj Risk", align: "c", sortKey: "injury_3plus_prob",
+    title: "Rest-of-season injury risk, relative to players at the same position",
+    render: (r) => riskBadge(r.injury_risk),
+  };
+
   const OVERALL_COLUMNS = [
     { key: "overall_rank", label: "Rank", align: "c", sortKey: "overall_rank",
       render: (r) => formatNumber(r.overall_rank, 0) },
@@ -148,8 +157,7 @@
       render: (r, ctx) => formatNumber(r.value, ctx.valueDecimals) },
     { key: "top12_prob", label: "Top 12", align: "r", sortKey: "top12_prob", cls: "num prob",
       render: (r) => probCell(r.top12_prob, "good") },
-    { key: "top24_prob", label: "Top 24", align: "r", sortKey: "top24_prob", cls: "num prob",
-      render: (r) => probCell(r.top24_prob, "good") },
+    INJURY_RISK_COLUMN,
   ];
 
   const POSITION_COLUMNS = [
@@ -165,23 +173,23 @@
       render: (r) => formatNumber(r.projected_ppg, 1) },
     { key: "top12_prob", label: "Top 12", align: "r", sortKey: "top12_prob", cls: "num prob",
       render: (r) => probCell(r.top12_prob, "good") },
-    { key: "top24_prob", label: "Top 24", align: "r", sortKey: "top24_prob", cls: "num prob",
-      render: (r) => probCell(r.top24_prob, "good") },
-    { key: "top36_prob", label: "Top 36", align: "r", sortKey: "top36_prob", cls: "num prob",
-      render: (r) => probCell(r.top36_prob, "good") },
+    INJURY_RISK_COLUMN,
   ];
 
   function columnsFor(view) {
-    if (view === "Overall") return OVERALL_COLUMNS;
-    // QB pool is only 32 deep, so Top 36 is meaningless there.
-    if (view === "QB") return POSITION_COLUMNS.filter((c) => c.key !== "top36_prob");
-    return POSITION_COLUMNS;
+    return view === "Overall" ? OVERALL_COLUMNS : POSITION_COLUMNS;
   }
 
   // ---- Cell renderers -----------------------------------------------------
   function tierBadge(tier) {
     if (isMissing(tier)) return DASH;
     return `<span class="tier-badge ${tierClass(tier)}">${tier}</span>`;
+  }
+
+  function riskBadge(risk) {
+    if (isMissing(risk) || String(risk).trim() === "") return DASH;
+    const cls = "risk-" + String(risk).trim().toLowerCase().replace(/\s+/g, "-");
+    return `<span class="risk-badge ${cls}">${escapeHtml(risk)}</span>`;
   }
 
   function playerCell(r) {
@@ -386,10 +394,11 @@
     // Head
     const thead = `<thead><tr>${cols.map((c) => {
       const isSorted = c.sortKey === state.sortKey;
-      const arrow = isSorted ? (state.sortDir === "asc" ? "▲" : "▼") : "";
+      const arrow = isSorted ? (state.sortDir === "asc" ? "▲" : "▼") : "↕";
+      const arrowCls = isSorted ? "th-arrow" : "th-arrow th-arrow-ghost";
       const titleAttr = c.title ? ` title="${escapeHtml(c.title)}"` : "";
       return `<th class="al-${c.align}${c.cls ? " " + c.cls : ""}${isSorted ? " is-sorted" : ""}" data-sortkey="${c.sortKey}"${titleAttr}>` +
-        `<span class="th-label">${c.label}</span><span class="th-arrow">${arrow}</span></th>`;
+        `<span class="th-label">${c.label}</span><span class="${arrowCls}">${arrow}</span></th>`;
     }).join("")}</tr></thead>`;
 
     // Body
@@ -397,8 +406,18 @@
     if (sorted.length === 0) {
       tbody = `<tbody><tr><td class="fm-emptyrow" colspan="${cols.length}">No players match “${escapeHtml(state.q)}”.</td></tr></tbody>`;
     } else {
+      // Mark tier boundaries so position views read as visual groups — only
+      // when the order actually follows tiers (rank or tier sort).
+      const tierGrouped = state.view !== "Overall" &&
+        (state.sortKey === "rank" || state.sortKey === "tier");
+      let prevTier = null;
       tbody = "<tbody>" + sorted.map((r) => {
-        return `<tr>` + cols.map((c) => {
+        let rowCls = "";
+        if (tierGrouped && !isMissing(r.tier)) {
+          if (prevTier !== null && r.tier !== prevTier) rowCls = ` class="is-tier-break"`;
+          prevTier = r.tier;
+        }
+        return `<tr${rowCls}>` + cols.map((c) => {
           const al = `al-${c.align}`;
           const extra = c.cls ? " " + c.cls : "";
           return `<td class="${al}${extra}">${c.render(r, currentCtx)}</td>`;

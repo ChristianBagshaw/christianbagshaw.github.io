@@ -5,11 +5,12 @@
    ============================================================ */
 
 :root {
-  --fm-good: rgba(96, 150, 116, 0.26);
-  --fm-good-strong: rgba(96, 150, 116, 0.5);
-  --fm-risk: rgba(192, 116, 104, 0.24);
-  --fm-zebra: rgba(20, 20, 20, 0.018);
-  --fm-row-hover: rgba(86, 93, 99, 0.09);
+  --fm-good: rgba(96, 150, 116, 0.32);
+  --fm-good-strong: rgba(96, 150, 116, 0.55);
+  --fm-risk: rgba(192, 116, 104, 0.3);
+  --fm-risk-strong: rgba(192, 116, 104, 0.55);
+  --fm-zebra: rgba(20, 20, 20, 0.035);
+  --fm-row-hover: rgba(62, 107, 83, 0.08);
 }
 
 /* The fantasy page wants more horizontal room than prose pages. */
@@ -31,8 +32,9 @@
 .fm-title {
   margin-bottom: 6px;
   color: var(--ink);
-  font-size: clamp(1.2rem, 2vw, 1.5rem);
-  font-weight: 660;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+  font-weight: 540;
   line-height: 1.15;
   letter-spacing: -0.01em;
 }
@@ -194,9 +196,23 @@
 
 .fm-search-group { margin-left: auto; }
 
+.fm-search-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.fm-search-wrap .fa-magnifying-glass {
+  position: absolute;
+  left: 11px;
+  font-size: 0.74rem;
+  color: var(--text-soft);
+  pointer-events: none;
+}
+
 .fm-search {
   width: clamp(180px, 22vw, 260px);
-  padding: 8px 12px;
+  padding: 8px 12px 8px 30px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--surface-raised);
@@ -283,6 +299,15 @@
   color: var(--accent);
 }
 
+/* Ghost arrow hints that a column is sortable; revealed on hover only. */
+.th-arrow-ghost {
+  opacity: 0;
+  color: var(--text-soft);
+  transition: opacity var(--ease);
+}
+
+.fm-table thead th:hover .th-arrow-ghost { opacity: 0.7; }
+
 .fm-table tbody td {
   padding: 7px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
@@ -295,6 +320,10 @@
 .fm-table tbody tr { transition: background var(--ease); }
 
 .fm-table tbody tr:hover td { background: var(--fm-row-hover); }
+
+/* First row of a new tier (position views, rank/tier sort) gets a heavier
+   top border so tiers read as groups. */
+.fm-table tbody tr.is-tier-break td { border-top: 1px solid var(--line-strong); }
 
 .al-l { text-align: left; }
 .al-c { text-align: center; }
@@ -361,6 +390,29 @@
 .tier-5 { background: #efeaf0; border-color: #d6c9d8; color: #6f5479; }
 .tier-6 { background: #ededed; border-color: #d2d2d2; color: #5d5d5d; }
 
+/* Injury risk badges (rest-of-season risk meter) */
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 680;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+}
+.risk-very-low  { background: #e2efe4; border-color: #bcd8c2; color: #2f6a44; }
+.risk-low       { background: #ecf2ec; border-color: #cfdfd2; color: #4a7a5a; }
+.risk-average   { background: #ededed; border-color: #d2d2d2; color: #5d5d5d; }
+.risk-high      { background: #f6e7c8; border-color: #e6d3a3; color: #8a6a1f; }
+.risk-very-high { background: #f3d8d4; border-color: #e6bbb3; color: #9a3b2e; }
+
 /* Injury / UFA chips */
 .chip {
   display: inline-block;
@@ -393,8 +445,14 @@
   width: calc(var(--p, 0) * 100%);
   border-radius: 4px;
 }
-.probwrap-good::before { background: var(--fm-good); }
-.probwrap-risk::before { background: var(--fm-risk); }
+.probwrap-good::before {
+  background: var(--fm-good);
+  box-shadow: inset -1px 0 0 var(--fm-good-strong);
+}
+.probwrap-risk::before {
+  background: var(--fm-risk);
+  box-shadow: inset -1px 0 0 var(--fm-risk-strong);
+}
 .probval { position: relative; }
 
 /* ---- Messages (loading / empty / missing / error) --------------------- */
@@ -460,7 +518,20 @@
      controls, status) — the table itself stays left-aligned/scaled. */
   .fm-head { text-align: center; }
   .fm-meta { justify-content: center; }
-  .fm-tabs { align-self: center; }
+
+  /* One equal-width cell per view tab — free wrapping puts an orphan tab on
+     its own line, which looks broken. */
+  .fm-tabs {
+    align-self: stretch;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .fm-tab {
+    min-width: 0;
+    padding: 7px 4px;
+    font-size: 0.8rem;
+  }
 
   .fm-control-row { gap: 10px; justify-content: center; }
   .fm-controlgroup { align-items: center; }
@@ -468,6 +539,7 @@
   .fm-overall-controls { gap: 10px; flex-wrap: wrap; justify-content: center; }
 
   .fm-search-group { margin-left: 0; width: 100%; }
+  .fm-search-wrap { width: 100%; }
   .fm-search { width: 100%; }
 
   .fm-statusbar { justify-content: center; }

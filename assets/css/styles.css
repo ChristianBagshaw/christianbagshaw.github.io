@@ -1,22 +1,23 @@
 :root {
-  --bg: #e7e7e5;
-  --surface: #f7f7f5;
+  --bg: #efeeea;
+  --surface: #fbfaf8;
   --surface-raised: #ffffff;
-  --surface-soft: #ececea;
-  --surface-tint: #eeeeec;
-  --ink: #151515;
-  --text: #252525;
-  --text-muted: #5d5d5a;
-  --text-soft: #8a8a84;
-  --line: #d2d2ce;
-  --line-strong: #b8b8b2;
-  --accent: #565d63;
-  --accent-ink: #24282b;
-  --accent-soft: #dedfdf;
+  --surface-soft: #efeeea;
+  --surface-tint: #f2f1ed;
+  --ink: #1a1916;
+  --text: #29281f;
+  --text-muted: #5d5c55;
+  --text-soft: #8a897f;
+  --line: #d8d6cf;
+  --line-strong: #bdbbb2;
+  --accent: #3e6b53;
+  --accent-ink: #2c4a3a;
+  --accent-soft: #e4ebe4;
   --success: #b7f0c0;
-  --shadow: 0 18px 55px rgba(30, 32, 28, 0.1);
+  --shadow: 0 1px 2px rgba(30, 32, 28, 0.05);
   --radius: 8px;
   --ease: 180ms ease;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
 }
 
 * {
@@ -41,10 +42,7 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 1.68;
-  background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0) 34rem),
-    radial-gradient(circle at 16% 4%, rgba(70, 76, 82, 0.14), transparent 28rem),
-    var(--bg);
+  background: var(--bg);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -55,7 +53,7 @@ body::before {
 
 a {
   color: var(--accent);
-  text-decoration-color: rgba(63, 95, 90, 0.34);
+  text-decoration-color: rgba(62, 107, 83, 0.38);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.22em;
   transition: color var(--ease), text-decoration-color var(--ease);
@@ -93,9 +91,8 @@ code {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(247, 247, 245, 0.82);
+  background: var(--surface);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
 }
 
 .profile-img {
@@ -118,10 +115,11 @@ code {
 .name {
   margin-bottom: 8px;
   color: var(--ink);
-  font-size: 1.55rem;
-  font-weight: 650;
+  font-family: var(--font-display);
+  font-size: 1.72rem;
+  font-weight: 560;
   line-height: 1.08;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
 }
 
 .name::after {
@@ -218,10 +216,8 @@ code {
   padding: clamp(26px, 4.8vw, 52px);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.36)),
-    var(--surface);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  background: var(--surface);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
@@ -239,10 +235,11 @@ code {
   padding-bottom: 14px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
   color: var(--ink);
-  font-size: clamp(1.18rem, 1.7vw, 1.55rem);
-  font-weight: 640;
+  font-family: var(--font-display);
+  font-size: clamp(1.32rem, 1.9vw, 1.72rem);
+  font-weight: 540;
   line-height: 1.2;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
 }
 
 .card-content {
@@ -276,6 +273,15 @@ code {
   padding-bottom: 0.15rem;
 }
 
+.entry-list {
+  padding-left: 1.5rem;
+  margin-left: 0;
+}
+
+.entry-list > li + li {
+  margin-top: 1.35rem;
+}
+
 .toast {
   position: fixed;
   bottom: 28px;
@@ -288,8 +294,8 @@ code {
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   color: var(--text);
-  background: rgba(247, 247, 245, 0.94);
-  box-shadow: var(--shadow);
+  background: rgba(251, 250, 248, 0.96);
+  box-shadow: 0 6px 24px rgba(30, 32, 28, 0.14);
   font-size: 0.9rem;
   font-weight: 560;
   opacity: 0;

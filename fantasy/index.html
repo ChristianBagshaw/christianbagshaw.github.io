@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Christian Bagshaw - Fantasy Football Rankings</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 
   <!-- Start data downloads during HTML parse, before app.js runs -->
   <link rel="preload" as="fetch" href="manifest.json" crossorigin="anonymous">
@@ -13,7 +14,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&display=swap" rel="stylesheet">
 
   <!-- Site + page CSS -->
   <link rel="stylesheet" href="../assets/css/styles.css">
@@ -64,8 +65,11 @@
 
             <div class="fm-controlgroup fm-search-group">
               <span class="fm-control-label">Search</span>
-              <input type="search" class="fm-search" id="fmSearch"
-                     placeholder="Player, team, or position" autocomplete="off" spellcheck="false">
+              <div class="fm-search-wrap">
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" class="fm-search" id="fmSearch"
+                       placeholder="Player, team, or position" autocomplete="off" spellcheck="false">
+              </div>
             </div>
           </div>
         </div>
