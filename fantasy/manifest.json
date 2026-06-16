@@ -299,7 +299,7 @@
     "scoring": "ppr",
     "use_shock": true
   },
-  "generated_at_utc": "2026-06-12T09:50:36.438093+00:00",
+  "generated_at_utc": "2026-06-16T07:42:08.343411+00:00",
   "missing_artifacts": [],
   "notes": [
     "Overall rankings are cross-position draft-value boards from ROS simulation VORP.",
