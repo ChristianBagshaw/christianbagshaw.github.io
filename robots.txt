@@ -1,0 +1,6 @@
+# Allow crawling of the site in general...
+User-agent: *
+Allow: /
+
+# ...but keep the private study tool out of search engines.
+Disallow: /study/

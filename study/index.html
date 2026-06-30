@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#efeeea" />
+
+  <!-- Keep this page out of search indexes -->
+  <meta name="robots" content="noindex, nofollow" />
+
+  <title>Flashcards · Christian Bagshaw</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+
+  <!-- Google Fonts (same families as the rest of the site) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&display=swap" rel="stylesheet" />
+
+  <!-- Shared site tokens + page-specific styles -->
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body class="study-page">
+  <!-- Slim brand bar that ties the tool back to the main site -->
+  <header class="site-bar">
+    <a class="site-brand" href="../index.html" aria-label="Christian Bagshaw — home">
+      <img class="site-brand-mark" src="../assets/favicon.svg" alt="" width="32" height="32" />
+      <span class="site-brand-name">Christian Bagshaw</span>
+    </a>
+    <a class="site-back" href="../index.html">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Back to site</span>
+    </a>
+  </header>
+
+  <main class="app-shell">
+    <aside class="library" aria-label="Flashcard stacks">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="7.5" width="14" height="11" rx="2.2" />
+            <path d="M7.5 5h9a2 2 0 0 1 2 2" opacity="0.55" />
+            <path d="M9 11.5h6M9 14.5h4" />
+          </svg>
+        </span>
+        <div class="brand-text">
+          <h1>Flashcards</h1>
+          <p>LaTeX study decks</p>
+        </div>
+      </div>
+
+      <nav id="stack-list" class="stack-list" aria-label="Stacks"></nav>
+    </aside>
+
+    <section class="workspace">
+      <header class="workspace-header">
+        <div class="workspace-heading">
+          <p id="crumb" class="crumb">Loading</p>
+          <h2 id="stack-title">Stacks</h2>
+          <p id="stack-meta" class="stack-meta">Choose a stack to begin.</p>
+        </div>
+
+        <div class="mode-switch" role="tablist" aria-label="View mode">
+          <button id="browse-mode" type="button" role="tab" class="active">All cards</button>
+          <button id="study-mode" type="button" role="tab">Study</button>
+        </div>
+      </header>
+
+      <div id="browse-toolbar" class="browse-toolbar">
+        <button id="toggle-answers" class="ghost-btn toggle-answers" type="button" aria-pressed="true">
+          <svg class="icon-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="icon-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3l18 18"/><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-3.4 4.1M6.5 6.6A17.6 17.6 0 0 0 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          <span class="toggle-label">Hide answers</span>
+        </button>
+      </div>
+
+      <div id="browse-view" class="browse-view"></div>
+
+      <div id="study-view" class="study-view hidden">
+        <div class="study-progress">
+          <span id="counter">0 / 0</span>
+          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"><span id="progress-bar"></span></div>
+        </div>
+
+        <div class="study-stage">
+          <button id="prev" class="nav-arrow" type="button" aria-label="Previous card">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+
+          <div class="card-area">
+            <article id="study-card" class="study-card" tabindex="0" aria-live="polite">
+              <div id="front" class="face"></div>
+              <div id="back" class="face answer hidden"></div>
+              <span class="reveal-hint">Tap or press <kbd>Space</kbd> to reveal</span>
+            </article>
+          </div>
+
+          <button id="next" class="nav-arrow" type="button" aria-label="Next card">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+
+        <div class="study-actions">
+          <button id="show" class="primary" type="button">Show answer</button>
+          <button id="shuffle" class="ghost-btn" type="button">Shuffle</button>
+          <button id="reset" class="ghost-btn" type="button">Reset order</button>
+        </div>
+
+        <div class="kbd-hints" aria-hidden="true">
+          <span><kbd>Space</kbd> reveal</span>
+          <span><kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate</span>
+        </div>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

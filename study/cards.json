@@ -1,0 +1,58 @@
+[
+  {
+    "topic": "Machine Learning",
+    "stacks": [
+      {
+        "name": "Optimisation",
+        "description": "Core update rules and loss behaviour.",
+        "cards": [
+          {
+            "front": "What is the gradient descent update rule?",
+            "back": "\\[\\theta_{t+1} = \\theta_t - \\eta \\nabla L(\\theta_t)\\]"
+          },
+          {
+            "front": "What does the learning rate \\(\\eta\\) control?",
+            "back": "It controls the step size taken in the direction of the negative gradient."
+          },
+          {
+            "front": "When can gradient descent overshoot a minimum?",
+            "back": "When \\(\\eta\\) is too large, updates can jump past the low-loss region and diverge."
+          }
+        ]
+      },
+      {
+        "name": "Linear Models",
+        "description": "Regression equations and geometry.",
+        "cards": [
+          {
+            "front": "State the normal equation for linear regression.",
+            "back": "For design matrix \\(X\\) and target vector \\(y\\), \\[\\hat\\beta = (X^T X)^{-1}X^T y.\\]"
+          },
+          {
+            "front": "What is the prediction rule for linear regression?",
+            "back": "\\[\\hat y = x^T\\hat\\beta\\]"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "topic": "Kernel Methods",
+    "stacks": [
+      {
+        "name": "Kernel Basics",
+        "description": "Feature maps, similarities, and kernel notation.",
+        "cards": [
+          {
+            "front": "What is a kernel?",
+            "back": "A kernel is a function \\(K(x,y)\\) such that \\[K(x,y)=\\langle \\phi(x), \\phi(y) \\rangle\\] for some feature map \\(\\phi\\)."
+          },
+          {
+            "front": "What is the kernel trick?",
+            "back": "It computes inner products in a feature space using \\(K(x,y)\\), without explicitly forming \\(\\phi(x)\\)."
+          }
+        ]
+      }
+    ]
+  }
+]
