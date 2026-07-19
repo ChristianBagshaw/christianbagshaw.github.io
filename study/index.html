@@ -72,6 +72,8 @@
           <p id="stack-meta" class="stack-meta">Choose a stack to begin.</p>
         </div>
 
+        <select id="stack-select" class="stack-select" aria-label="Choose stack"></select>
+
         <div class="mode-switch" role="tablist" aria-label="View mode">
           <button id="browse-mode" type="button" role="tab" class="active">All cards</button>
           <button id="study-mode" type="button" role="tab">Study</button>
@@ -79,7 +81,15 @@
       </header>
 
       <div id="browse-toolbar" class="browse-toolbar">
-        <button id="toggle-answers" class="ghost-btn toggle-answers" type="button" aria-pressed="true">
+        <button id="toggle-size" class="ghost-btn" type="button" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>Large</span>
+        </button>
+        <button id="toggle-answers" class="ghost-btn toggle-answers" type="button" aria-pressed="false">
           <svg class="icon-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -106,9 +116,13 @@
 
           <div class="card-area">
             <article id="study-card" class="study-card" tabindex="0" aria-live="polite">
-              <div id="front" class="face"></div>
-              <div id="back" class="face answer hidden"></div>
-              <span class="reveal-hint">Tap or press <kbd>Space</kbd> to reveal</span>
+              <div class="card-face card-front">
+                <div id="front" class="face"></div>
+                <span class="reveal-hint">Tap to reveal</span>
+              </div>
+              <div class="card-face card-back">
+                <div id="back" class="face answer"></div>
+              </div>
             </article>
           </div>
 

@@ -6,7 +6,8 @@ let originalCards = [];
 let cardIndex = 0;
 let showingBack = false;
 let mode = 'browse';
-let showBrowseAnswers = true;
+let showBrowseAnswers = false;
+let largeBrowseCards = false;
 
 const stackList = document.getElementById('stack-list');
 const crumb = document.getElementById('crumb');
@@ -25,16 +26,29 @@ const statusText = document.getElementById('status');
 const studyCard = document.getElementById('study-card');
 const browseToolbar = document.getElementById('browse-toolbar');
 const toggleAnswersButton = document.getElementById('toggle-answers');
+const toggleSizeButton = document.getElementById('toggle-size');
+const stackSelect = document.getElementById('stack-select');
+
+stackSelect.addEventListener('change', () => {
+  const [ti, si] = stackSelect.value.split('-').map(Number);
+  selectStack(ti, si);
+});
 
 async function loadDeck() {
   setStatus('Loading stacks...');
 
   try {
-    const res = await fetch('cards.json');
-    if (!res.ok) throw new Error(`Could not load cards.json (${res.status})`);
+    const index = await fetch('cards/index.json').then(r => {
+      if (!r.ok) throw new Error(`Could not load cards/index.json (${r.status})`);
+      return r.json();
+    });
 
-    const json = await res.json();
-    deck = normalizeDeck(json);
+    deck = await Promise.all(
+      index.map(file => fetch(`cards/${file}`).then(r => {
+        if (!r.ok) throw new Error(`Could not load cards/${file} (${r.status})`);
+        return r.json();
+      }))
+    );
 
     if (!deck.length) {
       showEmptyState();
@@ -51,25 +65,12 @@ async function loadDeck() {
   }
 }
 
-function normalizeDeck(json) {
-  if (!Array.isArray(json)) return [];
 
-  if (json[0]?.topic && Array.isArray(json[0]?.stacks)) {
-    return json;
-  }
-
-  return [
-    {
-      topic: 'Imported',
-      stacks: [
-        {
-          name: 'Cards',
-          description: 'Cards imported from the old flat format.',
-          cards: json
-        }
-      ]
-    }
-  ];
+function instantUnflip() {
+  studyCard.style.transition = 'none';
+  studyCard.classList.remove('is-flipped');
+  void studyCard.offsetWidth;
+  studyCard.style.transition = '';
 }
 
 function selectStack(topicIndex, stackIndex, nextMode = mode) {
@@ -81,6 +82,7 @@ function selectStack(topicIndex, stackIndex, nextMode = mode) {
   studyCards = [...stack.cards];
   cardIndex = 0;
   showingBack = false;
+  instantUnflip();
   mode = nextMode;
 
   render();
@@ -88,11 +90,24 @@ function selectStack(topicIndex, stackIndex, nextMode = mode) {
 
 function render() {
   renderStackList();
+  renderStackSelect();
   renderHeader();
   renderMode();
   renderBrowse();
   renderStudy();
   typesetMath();
+}
+
+function renderStackSelect() {
+  stackSelect.innerHTML = deck.map((topic, ti) => `
+    <optgroup label="${topic.topic}">
+      ${topic.stacks.map((stack, si) => `
+        <option value="${ti}-${si}" ${ti === selectedTopic && si === selectedStack ? 'selected' : ''}>
+          ${stack.name}
+        </option>
+      `).join('')}
+    </optgroup>
+  `).join('');
 }
 
 function renderStackList() {
@@ -146,23 +161,24 @@ function renderBrowse() {
   const stack = getCurrentStack();
 
   browseView.innerHTML = stack.cards.map((card, index) => `
-    <button class="mini-card" type="button" data-index="${index}">
-      <span class="mini-card-number">${index + 1}</span>
-      <strong>${card.front}</strong>
-      <span class="mini-back">${card.back}</span>
+    <button class="mini-card${showBrowseAnswers ? ' is-flipped' : ''}" type="button" data-index="${index}">
+      <div class="mini-face mini-front">
+        <span class="mini-card-number">${index + 1}</span>
+        <strong>${card.front}</strong>
+      </div>
+      <div class="mini-face mini-back-face">
+        <span class="mini-card-number">${index + 1}</span>
+        <p class="mini-answer">${card.back}</p>
+      </div>
     </button>
   `).join('');
 
-  browseView.classList.toggle('answers-hidden', !showBrowseAnswers);
+  browseView.classList.toggle('large-cards', largeBrowseCards);
 
   browseView.querySelectorAll('.mini-card').forEach((cardButton) => {
     cardButton.addEventListener('click', () => {
-      cardIndex = Number(cardButton.dataset.index);
-      studyCards = [...getCurrentStack().cards];
-      originalCards = [...studyCards];
-      showingBack = false;
-      mode = 'study';
-      render();
+      cardButton.classList.toggle('is-flipped');
+      typesetMath();
     });
   });
 }
@@ -180,7 +196,7 @@ function renderStudy() {
   const current = studyCards[cardIndex];
   front.innerHTML = current.front;
   back.innerHTML = current.back;
-  back.classList.toggle('hidden', !showingBack);
+  studyCard.classList.toggle('is-flipped', showingBack);
   showButton.textContent = showingBack ? 'Hide answer' : 'Show answer';
   showButton.disabled = false;
   counter.textContent = `${cardIndex + 1} / ${studyCards.length}`;
@@ -198,8 +214,9 @@ function showAnswer() {
 function nextCard() {
   if (mode !== 'study' || !studyCards.length) return;
 
-  cardIndex = (cardIndex + 1) % studyCards.length;
   showingBack = false;
+  instantUnflip();
+  cardIndex = (cardIndex + 1) % studyCards.length;
   renderStudy();
   typesetMath();
   animateCard('next');
@@ -208,8 +225,9 @@ function nextCard() {
 function prevCard() {
   if (mode !== 'study' || !studyCards.length) return;
 
-  cardIndex = (cardIndex - 1 + studyCards.length) % studyCards.length;
   showingBack = false;
+  instantUnflip();
+  cardIndex = (cardIndex - 1 + studyCards.length) % studyCards.length;
   renderStudy();
   typesetMath();
   animateCard('prev');
@@ -229,6 +247,7 @@ function shuffleCards() {
     .map(({ card }) => card);
   cardIndex = 0;
   showingBack = false;
+  instantUnflip();
   renderStudy();
   setStatus('Stack shuffled.');
   typesetMath();
@@ -238,6 +257,7 @@ function resetCards() {
   studyCards = [...originalCards];
   cardIndex = 0;
   showingBack = false;
+  instantUnflip();
   renderStudy();
   setStatus('Stack reset.');
   typesetMath();
@@ -250,7 +270,7 @@ function getCurrentStack() {
 function showEmptyState() {
   crumb.textContent = 'No deck';
   stackTitle.textContent = 'No stacks yet';
-  stackMeta.textContent = 'Add topics and stacks to cards.json.';
+  stackMeta.textContent = 'Add topic files to cards/ and list them in cards/index.json.';
   browseView.innerHTML = '<div class="empty-state">cards.json is empty.</div>';
   setStatus('');
 }
@@ -280,8 +300,18 @@ toggleAnswersButton.addEventListener('click', () => {
   applyBrowseAnswers();
 });
 
+toggleSizeButton.addEventListener('click', () => {
+  largeBrowseCards = !largeBrowseCards;
+  browseView.classList.toggle('large-cards', largeBrowseCards);
+  toggleSizeButton.setAttribute('aria-pressed', String(largeBrowseCards));
+  const label = toggleSizeButton.querySelector('span');
+  if (label) label.textContent = largeBrowseCards ? 'Compact' : 'Large';
+});
+
 function applyBrowseAnswers() {
-  browseView.classList.toggle('answers-hidden', !showBrowseAnswers);
+  browseView.querySelectorAll('.mini-card').forEach((card) => {
+    card.classList.toggle('is-flipped', showBrowseAnswers);
+  });
   toggleAnswersButton.classList.toggle('is-hidden', !showBrowseAnswers);
   toggleAnswersButton.setAttribute('aria-pressed', String(showBrowseAnswers));
   const label = toggleAnswersButton.querySelector('.toggle-label');
@@ -294,6 +324,33 @@ document.getElementById('shuffle').onclick = shuffleCards;
 document.getElementById('reset').onclick = resetCards;
 showButton.onclick = showAnswer;
 studyCard.onclick = showAnswer;
+
+// Touch swipe navigation
+let touchStartX = 0;
+let touchStartY = 0;
+let didSwipe = false;
+
+studyCard.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  didSwipe = false;
+}, { passive: true });
+
+studyCard.addEventListener('touchmove', (e) => {
+  const dx = Math.abs(e.touches[0].clientX - touchStartX);
+  const dy = Math.abs(e.touches[0].clientY - touchStartY);
+  if (dx > dy && dx > 8) didSwipe = true;
+}, { passive: true });
+
+studyCard.addEventListener('touchend', (e) => {
+  if (!didSwipe) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 44) {
+    e.preventDefault();
+    dx < 0 ? nextCard() : prevCard();
+  }
+  didSwipe = false;
+});
 
 document.addEventListener('keydown', (e) => {
   if (e.key === ' ') {

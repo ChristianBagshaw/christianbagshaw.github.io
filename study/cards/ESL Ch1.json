@@ -1,0 +1,27 @@
+{
+  "topic": "Decision Theory",
+  "stacks": [
+    {
+      "name": "Basics",
+      "description": "What boosting is and why weak learners are the right ingredient.",
+      "cards": [
+        {
+          "front": "What problem does boosting solve, and what does it combine?",
+          "back": "It turns many weak learners (each slightly better than trivial) into one strong learner by adding them sequentially, each correcting the errors of those before it."
+        },
+        {
+          "front": "One-line definition of a weak learner.",
+          "back": "Classification: error \\(\\le \\tfrac12 - \\gamma\\) for a fixed edge \\(\\gamma>0\\). Regression: optimally-scaled risk \\(\\le (1-\\gamma)\\mathrm{Var}(Y)\\), i.e. correlated with the target above a fixed threshold."
+        },
+        {
+          "front": "Why deliberately use weak (not strong) learners?",
+          "back": "Weak learners are high bias, low variance. Boosting drives down bias by combining many; strong learners would overfit fast and leave nothing for later rounds to correct."
+        },
+        {
+          "front": "Why are decision stumps the canonical weak learner?",
+          "back": "They are low-capacity (one split), fast, and reliably beat the trivial baseline by a small margin without overfitting, exactly the weak-learner profile."
+        }
+      ]
+    }
+  ]
+}
