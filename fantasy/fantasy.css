@@ -1,5 +1,5 @@
 /* ============================================================
-   Fantasy Measure — Rankings Board styles
+   Fantasy Football — Rankings Board styles
    Built on the site's CSS variables (assets/css/styles.css).
    Scoped with .fm- prefixes. Light, dense, scannable.
    ============================================================ */
@@ -94,6 +94,14 @@
   margin-bottom: 14px;
 }
 
+.fm-scope-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.fm-controlgroup.is-hidden { display: none; }
+
 .fm-tabs {
   display: inline-flex;
   flex-wrap: wrap;
@@ -184,6 +192,28 @@
   font-weight: 600;
 }
 
+.fm-segbtn:disabled {
+  cursor: not-allowed;
+}
+
+.fm-select {
+  min-width: 98px;
+  padding: 6px 30px 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 560;
+}
+
+.fm-select:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(86, 93, 99, 0.12);
+}
+
 .fm-overall-controls {
   display: inline-flex;
   gap: 18px;
@@ -246,7 +276,7 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
 }
 
-.fm-hint { font-style: italic; }
+.fm-hint { font-style: italic; text-align: right; }
 
 /* ---- Table ------------------------------------------------------------- */
 .fm-tablewrap {
@@ -338,6 +368,35 @@
 .col-player { min-width: 168px; }
 .player-name { font-weight: 560; color: var(--ink); }
 
+.weekly-player {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.weekly-player-main {
+  display: flex;
+  align-items: center;
+}
+
+.expand-caret {
+  display: inline-block;
+  width: 16px;
+  color: var(--text-soft);
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform var(--ease);
+}
+
+.weekly-player[aria-expanded="true"] .expand-caret { transform: rotate(90deg); }
+.weekly-player:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
 .col-team { width: 1%; }
 
 .team-tag {
@@ -366,6 +425,8 @@
 .pos-RB { background: rgba(90, 150, 110, 0.16); color: #3f7a53; border-color: rgba(90,150,110,.28); }
 .pos-WR { background: rgba(96, 128, 178, 0.16); color: #4a648f; border-color: rgba(96,128,178,.28); }
 .pos-TE { background: rgba(168, 130, 78, 0.18); color: #856231; border-color: rgba(168,130,78,.3); }
+.pos-K  { background: rgba(126, 105, 170, 0.16); color: #69538f; border-color: rgba(126,105,170,.28); }
+.pos-DST { background: rgba(92, 134, 139, 0.16); color: #456e73; border-color: rgba(92,134,139,.28); }
 
 /* Tier badges */
 .tier-badge {
@@ -427,7 +488,100 @@
 }
 .chip-inj { background: #f6e7c8; color: #8a6a1f; border-color: #e6d3a3; }
 .chip-out, .chip-ir { background: #f3d8d4; color: #9a3b2e; border-color: #e6bbb3; }
+.chip-sus { background: #eee2d4; color: #815c35; border-color: #d9c0a5; }
 .chip-ufa { background: var(--surface-soft); color: var(--text-soft); border-color: var(--line); }
+
+.fm-table tbody tr.is-unavailable .player-name {
+  color: var(--text-soft);
+  text-decoration: line-through;
+}
+
+.fm-table tbody tr.is-unavailable td { opacity: 0.68; }
+.fm-table tbody tr.is-unavailable .chip-inj { opacity: 1; }
+
+.weekly-details-row td {
+  padding: 0 !important;
+  background: var(--surface-soft) !important;
+}
+
+.weekly-details {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(110px, 1fr));
+  gap: 1px;
+  padding: 10px 12px 12px 44px;
+}
+
+.weekly-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+}
+
+.weekly-detail-label {
+  color: var(--text-soft);
+  font-size: 0.64rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.outcome-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 5px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--text-soft);
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: none;
+  cursor: help;
+  vertical-align: 1px;
+}
+
+.fm-floating-tip {
+  position: fixed;
+  z-index: 9999;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 20px));
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--ink);
+  box-shadow: 0 4px 14px rgba(20, 20, 20, 0.18);
+  color: var(--surface-raised);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+  pointer-events: none;
+}
+
+.fm-floating-tip[hidden] { display: none; }
+
+.outcome-help:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.weekly-detail-value {
+  color: var(--ink);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
 
 /* Probability micro-bars */
 .probwrap {
@@ -524,7 +678,7 @@
   .fm-tabs {
     align-self: stretch;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(var(--view-count, 5), minmax(0, 1fr));
   }
 
   .fm-tab {
@@ -534,6 +688,7 @@
   }
 
   .fm-control-row { gap: 10px; justify-content: center; }
+  .fm-scope-row { justify-content: center; }
   .fm-controlgroup { align-items: center; }
   .fm-control-label { padding-left: 0; }
   .fm-overall-controls { gap: 10px; flex-wrap: wrap; justify-content: center; }
@@ -542,7 +697,8 @@
   .fm-search-wrap { width: 100%; }
   .fm-search { width: 100%; }
 
-  .fm-statusbar { justify-content: center; }
+  .fm-statusbar { justify-content: center; flex-wrap: wrap; }
+  .fm-hint { width: 100%; text-align: center; }
 
   /* The table is scaled with transform:scale (see fitTable in app.js). The
      transformed element keeps its full-width layout box, so clip the empty
@@ -551,4 +707,13 @@
     max-height: none;
     overflow: hidden;
   }
+
+  .fm-tablewrap.is-weekly {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fm-tablewrap.is-weekly .fm-table { min-width: 760px; }
+
+  .weekly-details { grid-template-columns: repeat(5, minmax(100px, 1fr)); }
 }

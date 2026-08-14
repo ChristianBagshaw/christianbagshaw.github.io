@@ -1,29 +1,34 @@
 /* ============================================================
-   Fantasy Measure — Rankings Board
+   Fantasy Football — Rankings Board
    Static single-page app. No build step, no backend.
-   Reads manifest.json + overall/ + positions/ relative to this page.
+   Reads manifest.json + overall/ + positions/ + weekly/ relative to this page.
    ============================================================ */
 
 (() => {
   "use strict";
 
   // ---- Constants ----------------------------------------------------------
-  const POSITIONS = ["QB", "RB", "WR", "TE"];
-  const VIEWS = ["Overall", ...POSITIONS];
+  const ROS_POSITIONS = ["QB", "RB", "WR", "TE"];
+  const WEEKLY_POSITIONS = ["QB", "RB", "WR", "TE", "K", "DST"];
+  const ALL_VIEWS = ["Overall", ...WEEKLY_POSITIONS];
   const SCORINGS = ["ppr", "standard"];
   const FORMATS = ["normal", "superflex"];
   const SIZES = [8, 10, 12];
 
   const SCORING_LABEL = { ppr: "PPR", standard: "Standard" };
   const FORMAT_LABEL = { normal: "Normal", superflex: "Superflex" };
+  const SCOPE_LABEL = { ros: "Season", weekly: "Week" };
 
   // ---- State --------------------------------------------------------------
   let manifest = null;
   let overallKeys = new Set();   // `${format}_${size}_${scoring}`
   let positionKeys = new Set();  // `${scoring}_${position}`
+  let weeklyPaths = new Map();   // `${week}_${scoring}_${position}` -> path
   const cache = new Map();       // path -> Promise<data>
 
   const state = {
+    scope: "ros",
+    week: null,
     view: "Overall",
     scoring: "ppr",
     format: "normal",
@@ -32,6 +37,9 @@
     sortKey: null,
     sortDir: "asc",
   };
+
+  let lastRosPosition = "QB";
+  const expandedRows = new Set();
 
   // ---- DOM handles --------------------------------------------------------
   const el = {};
@@ -64,6 +72,20 @@
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return DASH;
     return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  function formatInjuryOverlay(iso) {
+    if (!iso) return "Injury status unavailable";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "Injury status unavailable";
+    const label = d.toLocaleString("en-US", {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "numeric", minute: "2-digit",
+    });
+    const ageDays = (Date.now() - d.getTime()) / 86400000;
+    return ageDays > 7
+      ? `Injury data may be outdated · last checked ${label}`
+      : `Injury status cached ${label}`;
   }
 
   // Decimals for the Value column: 1 if large magnitudes present, else 2.
@@ -99,10 +121,16 @@
     (manifest.datasets?.positions || []).forEach((d) => {
       positionKeys.add(`${d.scoring}_${d.position}`);
     });
+    (manifest.datasets?.weekly || []).forEach((d) => {
+      weeklyPaths.set(`${d.week}_${d.scoring}_${d.position}`, d.path);
+    });
     return manifest;
   }
 
   function getDatasetPath(s = state) {
+    if (s.scope === "weekly") {
+      return weeklyPaths.get(`${s.week}_${s.scoring}_${s.view}`) || null;
+    }
     if (s.view === "Overall") {
       return `overall/${s.format}_${s.league_size}_${s.scoring}.json`;
     }
@@ -110,6 +138,9 @@
   }
 
   function datasetAvailable(s = state) {
+    if (s.scope === "weekly") {
+      return weeklyPaths.has(`${s.week}_${s.scoring}_${s.view}`);
+    }
     if (s.view === "Overall") return overallKeys.has(`${s.format}_${s.league_size}_${s.scoring}`);
     return positionKeys.has(`${s.scoring}_${s.view}`);
   }
@@ -176,8 +207,29 @@
     INJURY_RISK_COLUMN,
   ];
 
-  function columnsFor(view) {
-    return view === "Overall" ? OVERALL_COLUMNS : POSITION_COLUMNS;
+  const WEEKLY_COLUMNS = [
+    { key: "rank", label: "Rank", align: "c", sortKey: "rank",
+      render: (r) => formatNumber(r.rank, 0) },
+    { key: "tier", label: "Tier", align: "c", sortKey: "tier",
+      render: (r) => tierBadge(r.tier) },
+    { key: "player_name", label: "Player", align: "l", sortKey: "player_name", cls: "col-player col-player-weekly",
+      render: (r, ctx) => weeklyPlayerCell(r, ctx) },
+    { key: "team", label: "Team", align: "c", sortKey: "team", cls: "col-team",
+      render: (r) => teamCell(r.team) },
+    { key: "model_points", label: "Projection", align: "r", sortKey: "model_points", cls: "num",
+      helpKey: "model_points",
+      render: (r) => formatNumber(r.model_points, 1) },
+    { key: "top12_prob", label: "Top 12", align: "r", sortKey: "top12_prob", cls: "num prob",
+      helpKey: "top12_prob",
+      render: (r) => probCell(r.top12_prob, "good") },
+    { key: "top24_prob", label: "Top 24", align: "r", sortKey: "top24_prob", cls: "num prob",
+      helpKey: "top24_prob",
+      render: (r) => probCell(r.top24_prob, "good") },
+  ];
+
+  function columnsFor(s = state) {
+    if (s.scope === "weekly") return WEEKLY_COLUMNS;
+    return s.view === "Overall" ? OVERALL_COLUMNS : POSITION_COLUMNS;
   }
 
   // ---- Cell renderers -----------------------------------------------------
@@ -201,6 +253,17 @@
     return `<span class="player-name">${escapeHtml(name)}</span>${markers}`;
   }
 
+  function weeklyPlayerCell(r, ctx) {
+    const name = escapeHtml(r.player_name || DASH);
+    const inj = (r.injury_status || "").toString().trim().toUpperCase();
+    const injChip = inj
+      ? ` <span class="chip chip-inj chip-${escapeHtml(inj.toLowerCase())}">${escapeHtml(inj)}</span>`
+      : "";
+    return `<button class="weekly-player" type="button" data-expand="${escapeHtml(ctx.rowKey(r))}" aria-expanded="${ctx.isExpanded(r)}">` +
+      `<span class="weekly-player-main"><span class="expand-caret" aria-hidden="true">›</span>` +
+      `<span class="player-name">${name}</span>${injChip}</span></button>`;
+  }
+
   function teamCell(team) {
     if (!team) return DASH;
     const t = String(team).toUpperCase();
@@ -217,6 +280,76 @@
     return String(s).replace(/[&<>"']/g, (c) => (
       { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
     ));
+  }
+
+  function metricExplanation(key) {
+    const weeklyMetricHelp = {
+      model_points: "The model's projected fantasy points for this week. The board is ranked by this value.",
+      top12_prob: "Chance of finishing among the top 12 players at this position this week.",
+      top24_prob: "Chance of finishing among the top 24 players at this position this week.",
+      odds_up: "Chance of scoring more points than the player ranked directly above. This does not apply to rank 1.",
+    };
+    if (weeklyMetricHelp[key]) return weeklyMetricHelp[key];
+
+    const defaults = {
+      bust_prob: "<= 5",
+      good_prob: ">= 10",
+      great_prob: ">= 20",
+      boom_prob: ">= 25",
+    };
+    const raw = manifest?.weekly_outcome_thresholds?.[key] || defaults[key] || "";
+    const amount = raw.match(/[\d.]+/)?.[0] || "the threshold";
+    const threshold = raw.trim().startsWith("<=")
+      ? `${amount} points or fewer`
+      : `${amount} points or more`;
+    const cumulative = key === "good_prob"
+      ? " Great and boom games are included in this probability."
+      : key === "great_prob"
+        ? " Boom games are included in this probability."
+        : "";
+    return `Chance of scoring ${threshold}.${cumulative}`;
+  }
+
+  function metricHelp(key, label) {
+    const explanation = metricExplanation(key);
+    return `<span class="outcome-help" tabindex="0" role="note" aria-label="${escapeHtml(`${label}: ${explanation}`)}" data-tip="${escapeHtml(explanation)}">i</span>`;
+  }
+
+  let floatingTip = null;
+
+  function showMetricTip(target) {
+    if (!target?.dataset?.tip) return;
+    if (!floatingTip) {
+      floatingTip = document.createElement("div");
+      floatingTip.id = "fmMetricTooltip";
+      floatingTip.className = "fm-floating-tip";
+      floatingTip.setAttribute("role", "tooltip");
+      document.body.appendChild(floatingTip);
+    }
+
+    floatingTip.textContent = target.dataset.tip;
+    floatingTip.hidden = false;
+    floatingTip.style.visibility = "hidden";
+
+    const anchor = target.getBoundingClientRect();
+    const tip = floatingTip.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const gutter = 10;
+    let left = anchor.left + (anchor.width - tip.width) / 2;
+    left = Math.max(gutter, Math.min(left, viewportWidth - tip.width - gutter));
+
+    let top = anchor.bottom + 8;
+    if (top + tip.height > viewportHeight - gutter) top = anchor.top - tip.height - 8;
+    top = Math.max(gutter, top);
+
+    floatingTip.style.left = `${Math.round(left)}px`;
+    floatingTip.style.top = `${Math.round(top)}px`;
+    floatingTip.style.visibility = "visible";
+  }
+
+  function hideMetricTip() {
+    if (floatingTip) floatingTip.hidden = true;
   }
 
   // ---- Sorting & filtering ------------------------------------------------
@@ -258,18 +391,65 @@
   // manifest has loaded, so the big dataset download can start in parallel.
   function speculativePath() {
     const p = new URLSearchParams(window.location.search);
-    const view = VIEWS.includes(p.get("view")) ? p.get("view") : "Overall";
+    if (p.get("scope") === "weekly") return null;
+    const view = ["Overall", ...ROS_POSITIONS].includes(p.get("view")) ? p.get("view") : "Overall";
     const scoring = SCORINGS.includes(p.get("scoring")) ? p.get("scoring") : "ppr";
     const format = FORMATS.includes(p.get("format")) ? p.get("format") : "normal";
     const sizeRaw = parseInt(p.get("league_size"), 10);
     const league_size = SIZES.includes(sizeRaw) ? sizeRaw : 12;
-    return getDatasetPath({ view, scoring, format, league_size });
+    if (view === "Overall") return `overall/${format}_${league_size}_${scoring}.json`;
+    return `positions/${scoring}/${view}.json`;
+  }
+
+  function scopeOptions() {
+    const scopes = manifest?.options?.scopes;
+    return Array.isArray(scopes) && scopes.length ? scopes : ["ros"];
+  }
+
+  function weekOptions() {
+    const weeks = manifest?.options?.weeks;
+    return Array.isArray(weeks) ? weeks.map(Number).filter(Number.isFinite) : [];
+  }
+
+  function positionsForScope(scope = state.scope) {
+    const key = scope === "weekly" ? "weekly_positions" : "positions";
+    const fallback = scope === "weekly" ? WEEKLY_POSITIONS : ROS_POSITIONS;
+    const positions = manifest?.options?.[key];
+    return Array.isArray(positions) && positions.length ? positions : fallback;
+  }
+
+  function viewsForScope(scope = state.scope) {
+    return scope === "weekly" ? positionsForScope(scope) : ["Overall", ...positionsForScope(scope)];
+  }
+
+  function normalizeState() {
+    if (!scopeOptions().includes(state.scope)) state.scope = scopeOptions()[0] || "ros";
+
+    const weeks = weekOptions();
+    if (state.scope === "weekly" && !weeks.includes(Number(state.week))) {
+      state.week = weeks.includes(Number(manifest?.defaults?.week))
+        ? Number(manifest.defaults.week)
+        : (weeks.at(-1) ?? null);
+    }
+
+    const views = viewsForScope();
+    if (!views.includes(state.view)) {
+      const availablePositions = positionsForScope();
+      state.view = availablePositions.includes(lastRosPosition)
+        ? lastRosPosition
+        : (availablePositions[0] || "QB");
+    }
+    if (state.scope === "ros" && state.view !== "Overall") lastRosPosition = state.view;
   }
 
   function readUrlState() {
     const p = new URLSearchParams(window.location.search);
+    const scope = p.get("scope");
+    if (scope && scopeOptions().includes(scope)) state.scope = scope;
+    const week = parseInt(p.get("week"), 10);
+    if (weekOptions().includes(week)) state.week = week;
     const view = p.get("view");
-    if (view && VIEWS.includes(view)) state.view = view;
+    if (view && ALL_VIEWS.includes(view)) state.view = view;
     const scoring = p.get("scoring");
     if (scoring && SCORINGS.includes(scoring)) state.scoring = scoring;
     const format = p.get("format");
@@ -277,19 +457,25 @@
     const size = parseInt(p.get("league_size"), 10);
     if (SIZES.includes(size)) state.league_size = size;
     const q = p.get("q");
-    if (q) state.q = q;
+    if (q !== null) state.q = q;
+    normalizeState();
   }
 
   function applyDefaults() {
     const d = manifest.defaults || {};
+    if (d.scope) state.scope = d.scope;
+    if (d.week != null) state.week = Number(d.week);
     if (d.position) state.view = d.position; // "Overall" or a position
     if (d.scoring) state.scoring = d.scoring;
     if (d.format) state.format = d.format;
     if (d.league_size) state.league_size = d.league_size;
+    normalizeState();
   }
 
   function writeUrlState() {
     const p = new URLSearchParams();
+    p.set("scope", state.scope);
+    if (state.scope === "weekly" && state.week != null) p.set("week", String(state.week));
     p.set("view", state.view);
     p.set("scoring", state.scoring);
     p.set("format", state.format);
@@ -300,7 +486,7 @@
   }
 
   function resetSortForView() {
-    state.sortKey = state.view === "Overall" ? "overall_rank" : "rank";
+    state.sortKey = state.scope === "ros" && state.view === "Overall" ? "overall_rank" : "rank";
     state.sortDir = "asc";
   }
 
@@ -312,11 +498,23 @@
 
   // ---- Rendering: controls ------------------------------------------------
   function renderControls() {
-    const isOverall = state.view === "Overall";
+    const isOverall = state.scope === "ros" && state.view === "Overall";
+    const views = viewsForScope();
+
+    el.segScope.innerHTML = scopeOptions().map((scope) =>
+      `<button class="fm-segbtn${scope === state.scope ? " is-active" : ""}" data-scope="${scope}" aria-pressed="${scope === state.scope}">${SCOPE_LABEL[scope] || scope}</button>`
+    ).join("");
+
+    const weeks = weekOptions();
+    el.weekControl.classList.toggle("is-hidden", state.scope !== "weekly");
+    el.fmWeek.innerHTML = weeks.map((week) =>
+      `<option value="${week}"${week === state.week ? " selected" : ""}>Week ${week}</option>`
+    ).join("");
 
     // View tabs
-    el.viewTabs.innerHTML = VIEWS.map((v) =>
-      `<button class="fm-tab${v === state.view ? " is-active" : ""}" data-view="${v}">${v}</button>`
+    el.viewTabs.style.setProperty("--view-count", views.length);
+    el.viewTabs.innerHTML = views.map((v) =>
+      `<button class="fm-tab${v === state.view ? " is-active" : ""}" data-view="${v}" role="tab" aria-selected="${v === state.view}">${v}</button>`
     ).join("");
 
     // Segmented controls
@@ -325,16 +523,16 @@
     ).join("");
 
     el.segFormat.innerHTML = FORMATS.map((f) =>
-      `<button class="fm-segbtn${f === state.format ? " is-active" : ""}" data-control="format" data-value="${f}">${FORMAT_LABEL[f]}</button>`
+      `<button class="fm-segbtn${f === state.format ? " is-active" : ""}" data-control="format" data-value="${f}"${isOverall ? "" : " disabled"}>${FORMAT_LABEL[f]}</button>`
     ).join("");
 
     el.segSize.innerHTML = SIZES.map((n) =>
-      `<button class="fm-segbtn${n === state.league_size ? " is-active" : ""}" data-control="league_size" data-value="${n}">${n}</button>`
+      `<button class="fm-segbtn${n === state.league_size ? " is-active" : ""}" data-control="league_size" data-value="${n}"${isOverall ? "" : " disabled"}>${n}</button>`
     ).join("");
 
     // Soften format + size on position tabs (they only affect Overall)
     el.overallControls.classList.toggle("is-muted", !isOverall);
-    el.overallControls.setAttribute("title", isOverall ? "" : "Format and league size only affect the Overall board");
+    el.overallControls.setAttribute("title", isOverall ? "" : "Format and league size only affect the Season Overall board");
 
     if (el.fmSearch.value !== state.q) el.fmSearch.value = state.q;
   }
@@ -344,13 +542,20 @@
     const season = manifest.season ?? dsMeta?.season ?? DASH;
     const chips = [
       ["Season", season],
+      ["Scope", SCOPE_LABEL[state.scope]],
       ["Scoring", SCORING_LABEL[state.scoring]],
     ];
-    if (state.view === "Overall") {
+    if (state.scope === "weekly") {
+      chips.push(["Week", dsMeta?.week ?? state.week ?? DASH]);
+      chips.push(["Position", state.view]);
+    } else if (state.view === "Overall") {
       chips.push(["Format", FORMAT_LABEL[state.format]]);
       chips.push(["League", `${state.league_size}-team`]);
     } else {
       chips.push(["Position", state.view]);
+    }
+    if (state.scope === "ros" && manifest.anchor_week != null) {
+      chips.push(["Anchor", `Week ${manifest.anchor_week}`]);
     }
 
     el.fmMeta.innerHTML = chips.map(([k, v]) =>
@@ -359,12 +564,22 @@
 
     // Subtitle
     let sub;
-    if (state.view === "Overall") {
+    if (state.scope === "weekly") {
+      sub = `Week ${state.week} Start/Sit · ${state.view} · ${SCORING_LABEL[state.scoring]}`;
+    } else if (state.view === "Overall") {
       sub = `Draft Rankings · ${state.league_size}-team ${SCORING_LABEL[state.scoring]} · ${FORMAT_LABEL[state.format]}`;
     } else {
       sub = `${state.view} Rankings · ${SCORING_LABEL[state.scoring]} · Projections`;
     }
     el.fmSubtitle.textContent = sub;
+
+    el.fmHint.textContent = state.scope === "weekly"
+      ? formatInjuryOverlay(manifest.injury_overlay_as_of_utc)
+      : `Updated ${formatGenerated(manifest.generated_at_utc)}`;
+
+    el.fmMethod.innerHTML = state.scope === "weekly"
+      ? `Weekly ranks follow the model forecast; outcome and finish probabilities come from simulations. Injury tags are a cached overlay and do not change rank. For more information, see <a href="../Projects/index.html">here</a>.`
+      : `Overall ranks use simulation-based value over replacement for the selected format, league size, and scoring. Position tables show rest-of-season PPG distributions and top-k finish probabilities. For more information, see <a href="../Projects/index.html">here</a>.`;
   }
 
   // ---- Rendering: states --------------------------------------------------
@@ -385,7 +600,21 @@
   let currentColumns = [];
   let currentCtx = {};
 
+  function expandedDetails(r) {
+    const details = [
+      ["Bust", formatPercent(r.bust_prob, 1), "bust_prob"],
+      ["Good game", formatPercent(r.good_prob, 1), "good_prob"],
+      ["Great game", formatPercent(r.great_prob, 1), "great_prob"],
+      ["Boom", formatPercent(r.boom_prob, 1), "boom_prob"],
+      ["Beats rank above", formatPercent(r.odds_up, 1), "odds_up"],
+    ];
+    return `<div class="weekly-details">${details.map(([label, value, helpKey]) =>
+      `<span class="weekly-detail"><span class="weekly-detail-label">${label}${metricHelp(helpKey, label)}</span><span class="weekly-detail-value">${value}</span></span>`
+    ).join("")}</div>`;
+  }
+
   function renderTable() {
+    hideMetricTip();
     const cols = currentColumns;
     const col = cols.find((c) => c.sortKey === state.sortKey) || null;
     const filtered = filterRows(currentRows, state.q);
@@ -396,9 +625,10 @@
       const isSorted = c.sortKey === state.sortKey;
       const arrow = isSorted ? (state.sortDir === "asc" ? "▲" : "▼") : "↕";
       const arrowCls = isSorted ? "th-arrow" : "th-arrow th-arrow-ghost";
-      const titleAttr = c.title ? ` title="${escapeHtml(c.title)}"` : "";
+      const title = c.helpKey ? "" : c.title;
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
       return `<th class="al-${c.align}${c.cls ? " " + c.cls : ""}${isSorted ? " is-sorted" : ""}" data-sortkey="${c.sortKey}"${titleAttr}>` +
-        `<span class="th-label">${c.label}</span><span class="${arrowCls}">${arrow}</span></th>`;
+        `<span class="th-label">${c.label}${c.helpKey ? metricHelp(c.helpKey, c.label) : ""}</span><span class="${arrowCls}">${arrow}</span></th>`;
     }).join("")}</tr></thead>`;
 
     // Body
@@ -412,16 +642,26 @@
         (state.sortKey === "rank" || state.sortKey === "tier");
       let prevTier = null;
       tbody = "<tbody>" + sorted.map((r) => {
-        let rowCls = "";
+        const rowClasses = [];
         if (tierGrouped && !isMissing(r.tier)) {
-          if (prevTier !== null && r.tier !== prevTier) rowCls = ` class="is-tier-break"`;
+          if (prevTier !== null && r.tier !== prevTier) rowClasses.push("is-tier-break");
           prevTier = r.tier;
         }
-        return `<tr${rowCls}>` + cols.map((c) => {
+        const injury = String(r.injury_status || "").toUpperCase();
+        if (state.scope === "weekly" && ["OUT", "IR", "SUS"].includes(injury)) {
+          rowClasses.push("is-unavailable");
+        }
+        const rowKey = currentCtx.rowKey(r);
+        const isExpanded = state.scope === "weekly" && expandedRows.has(rowKey);
+        if (isExpanded) rowClasses.push("is-expanded");
+        const rowCls = rowClasses.length ? ` class="${rowClasses.join(" ")}"` : "";
+        const mainRow = `<tr${rowCls}>` + cols.map((c) => {
           const al = `al-${c.align}`;
           const extra = c.cls ? " " + c.cls : "";
           return `<td class="${al}${extra}">${c.render(r, currentCtx)}</td>`;
         }).join("") + `</tr>`;
+        if (!isExpanded) return mainRow;
+        return mainRow + `<tr class="weekly-details-row"><td colspan="${cols.length}">${expandedDetails(r)}</td></tr>`;
       }).join("") + "</tbody>";
     }
 
@@ -449,6 +689,9 @@
     el.table.style.transformOrigin = "";
     el.tableWrap.style.height = "";
     if (!isMobile) return;
+    // Weekly boards have more decision columns. Keep them at a readable size
+    // and let the wrapper scroll horizontally instead of shrinking the text.
+    if (state.scope === "weekly") return;
 
     const avail = el.tableWrap.clientWidth;
     // getBoundingClientRect gives sub-pixel width (offsetWidth rounds down,
@@ -479,6 +722,8 @@
   async function render() {
     renderControls();
     writeUrlState();
+    el.tableWrap.classList.toggle("is-weekly", state.scope === "weekly");
+    const token = ++loadToken;
 
     // Availability check
     if (!datasetAvailable()) {
@@ -491,7 +736,6 @@
     }
 
     const path = getDatasetPath();
-    const token = ++loadToken;
 
     // Loading state (skip flash if already cached)
     if (!cache.has(path)) {
@@ -503,8 +747,12 @@
       if (token !== loadToken) return; // a newer request superseded this one
 
       currentRows = Array.isArray(data.rows) ? data.rows : [];
-      currentColumns = columnsFor(state.view);
-      currentCtx = { valueDecimals: valueDecimalsFor(currentRows) };
+      currentColumns = columnsFor();
+      currentCtx = {
+        valueDecimals: valueDecimalsFor(currentRows),
+        rowKey: (r) => `${path}:${r.player_id || `${r.rank}:${r.player_name || "player"}`}`,
+        isExpanded: (r) => expandedRows.has(`${path}:${r.player_id || `${r.rank}:${r.player_name || "player"}`}`),
+      };
 
       renderMeta(data.metadata);
       hideTableMessage();
@@ -522,12 +770,31 @@
 
   // ---- Event wiring -------------------------------------------------------
   function wireEvents() {
+    el.segScope.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-scope]");
+      if (!btn || btn.dataset.scope === state.scope) return;
+      if (state.scope === "ros" && state.view !== "Overall") lastRosPosition = state.view;
+      state.scope = btn.dataset.scope;
+      normalizeState();
+      resetSortForView();
+      render();
+    });
+
+    el.fmWeek.addEventListener("change", () => {
+      const week = Number(el.fmWeek.value);
+      if (!weekOptions().includes(week) || week === state.week) return;
+      state.week = week;
+      resetSortForView();
+      render();
+    });
+
     el.viewTabs.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-view]");
       if (!btn) return;
       const v = btn.dataset.view;
       if (v === state.view) return;
       state.view = v;
+      if (state.scope === "ros" && v !== "Overall") lastRosPosition = v;
       resetSortForView();
       render();
     });
@@ -552,8 +819,34 @@
       renderTable();
     });
 
+    el.table.addEventListener("mouseover", (e) => {
+      const help = e.target.closest(".outcome-help");
+      if (help) showMetricTip(help);
+    });
+    el.table.addEventListener("mouseout", (e) => {
+      const help = e.target.closest(".outcome-help");
+      if (help) hideMetricTip();
+    });
+    el.table.addEventListener("focusin", (e) => {
+      const help = e.target.closest(".outcome-help");
+      if (help) showMetricTip(help);
+    });
+    el.table.addEventListener("focusout", (e) => {
+      if (e.target.closest(".outcome-help")) hideMetricTip();
+    });
+    el.tableWrap.addEventListener("scroll", hideMetricTip, { passive: true });
+
     // Sortable headers
     el.table.addEventListener("click", (e) => {
+      if (e.target.closest(".outcome-help")) return;
+      const expand = e.target.closest("[data-expand]");
+      if (expand) {
+        const key = expand.dataset.expand;
+        if (expandedRows.has(key)) expandedRows.delete(key);
+        else expandedRows.add(key);
+        renderTable();
+        return;
+      }
       const th = e.target.closest("th[data-sortkey]");
       if (!th) return;
       const key = th.dataset.sortkey;
@@ -569,9 +862,11 @@
     // Re-fit the table when the viewport changes (rotation, resize, etc.)
     let resizeRaf = 0;
     window.addEventListener("resize", () => {
+      hideMetricTip();
       cancelAnimationFrame(resizeRaf);
       resizeRaf = requestAnimationFrame(fitTable);
     });
+    window.addEventListener("scroll", hideMetricTip, { passive: true });
 
     // The initial fit happens with fallback fonts; once the web fonts (Inter /
     // JetBrains Mono) load, the table gets wider, so re-measure. On a real phone
@@ -592,6 +887,9 @@
   // ---- Boot ---------------------------------------------------------------
   function cacheDom() {
     el.viewTabs = document.getElementById("fmViewTabs");
+    el.segScope = document.getElementById("fmSegScope");
+    el.weekControl = document.getElementById("fmWeekControl");
+    el.fmWeek = document.getElementById("fmWeek");
     el.segScoring = document.getElementById("fmSegScoring");
     el.segFormat = document.getElementById("fmSegFormat");
     el.segSize = document.getElementById("fmSegSize");
@@ -601,6 +899,8 @@
     el.fmSubtitle = document.getElementById("fmSubtitle");
     el.fmTitle = document.getElementById("fmTitle");
     el.fmCount = document.getElementById("fmCount");
+    el.fmHint = document.getElementById("fmHint");
+    el.fmMethod = document.getElementById("fmMethod");
     el.table = document.getElementById("fmTable");
     el.tableWrap = document.getElementById("fmTableWrap");
     el.fmMessage = document.getElementById("fmMessage");
@@ -613,7 +913,8 @@
 
     // Kick off the most-likely dataset download immediately, in parallel with
     // the manifest. render() reuses this in-flight promise from the cache.
-    loadDataset(speculativePath());
+    const earlyPath = speculativePath();
+    if (earlyPath) loadDataset(earlyPath);
 
     try {
       await loadManifest();

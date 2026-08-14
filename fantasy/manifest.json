@@ -1,5 +1,6 @@
 {
   "anchor_week": 1,
+  "current_week": 1,
   "datasets": {
     "overall": [
       {
@@ -290,21 +291,184 @@
         "source_scoring": "standard",
         "top_n": 36
       }
+    ],
+    "weekly": [
+      {
+        "key": "week1_ppr_DST",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/ppr/DST.json",
+        "position": "DST",
+        "rows": 32,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/DST.csv",
+        "source_scoring": "standard",
+        "top_n": 32,
+        "week": 1
+      },
+      {
+        "key": "week1_ppr_K",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/ppr/K.json",
+        "position": "K",
+        "rows": 32,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/K.csv",
+        "source_scoring": "standard",
+        "top_n": 32,
+        "week": 1
+      },
+      {
+        "key": "week1_ppr_QB",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/ppr/QB.json",
+        "position": "QB",
+        "rows": 32,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/QB.csv",
+        "source_scoring": "standard",
+        "top_n": 40,
+        "week": 1
+      },
+      {
+        "key": "week1_ppr_RB",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/ppr/RB.json",
+        "position": "RB",
+        "rows": 80,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=ppr/RB.csv",
+        "source_scoring": "ppr",
+        "top_n": 80,
+        "week": 1
+      },
+      {
+        "key": "week1_ppr_TE",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/ppr/TE.json",
+        "position": "TE",
+        "rows": 40,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=ppr/TE.csv",
+        "source_scoring": "ppr",
+        "top_n": 40,
+        "week": 1
+      },
+      {
+        "key": "week1_ppr_WR",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/ppr/WR.json",
+        "position": "WR",
+        "rows": 96,
+        "scoring": "ppr",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=ppr/WR.csv",
+        "source_scoring": "ppr",
+        "top_n": 96,
+        "week": 1
+      },
+      {
+        "key": "week1_standard_DST",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/standard/DST.json",
+        "position": "DST",
+        "rows": 32,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/DST.csv",
+        "source_scoring": "standard",
+        "top_n": 32,
+        "week": 1
+      },
+      {
+        "key": "week1_standard_K",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/standard/K.json",
+        "position": "K",
+        "rows": 32,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/K.csv",
+        "source_scoring": "standard",
+        "top_n": 32,
+        "week": 1
+      },
+      {
+        "key": "week1_standard_QB",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/standard/QB.json",
+        "position": "QB",
+        "rows": 32,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/QB.csv",
+        "source_scoring": "standard",
+        "top_n": 40,
+        "week": 1
+      },
+      {
+        "key": "week1_standard_RB",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/standard/RB.json",
+        "position": "RB",
+        "rows": 80,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/RB.csv",
+        "source_scoring": "standard",
+        "top_n": 80,
+        "week": 1
+      },
+      {
+        "key": "week1_standard_TE",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/standard/TE.json",
+        "position": "TE",
+        "rows": 40,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/TE.csv",
+        "source_scoring": "standard",
+        "top_n": 40,
+        "week": 1
+      },
+      {
+        "key": "week1_standard_WR",
+        "kind": "weekly_rankings",
+        "path": "weekly/week_1/standard/WR.json",
+        "position": "WR",
+        "rows": 96,
+        "scoring": "standard",
+        "season": 2026,
+        "source_artifact": "data/sim_views/weekly/season=2026/week=1/scoring=standard/WR.csv",
+        "source_scoring": "standard",
+        "top_n": 96,
+        "week": 1
+      }
     ]
   },
   "defaults": {
     "format": "normal",
     "league_size": 12,
     "position": "Overall",
+    "scope": "ros",
     "scoring": "ppr",
-    "use_shock": true
+    "use_shock": true,
+    "week": 1
   },
-  "generated_at_utc": "2026-07-06T03:53:02.102794+00:00",
+  "generated_at_utc": "2026-08-14T05:00:52.434938+00:00",
+  "injury_overlay_as_of_utc": "2026-08-14T05:00:37.634680+00:00",
   "missing_artifacts": [],
   "notes": [
     "Overall rankings are cross-position draft-value boards from ROS simulation VORP.",
     "Position rankings are ROS simulation boards sorted within position with top-k finish probabilities.",
-    "QB is a single-scoring position in the model pipeline; PPR and standard website lenses may share the same QB source artifact."
+    "Weekly boards are single-week start/sit boards ordered by the core model forecast (model_points).",
+    "Weekly boards include K and DST; the season-long boards deliberately do not.",
+    "QB, K, and DST are single-scoring in the model pipeline; PPR and standard website lenses may share the same source artifact for those positions."
   ],
   "options": {
     "formats": [
@@ -323,12 +487,34 @@
       "WR",
       "TE"
     ],
+    "scopes": [
+      "ros",
+      "weekly"
+    ],
     "scorings": [
       "ppr",
       "standard"
+    ],
+    "weekly_positions": [
+      "QB",
+      "RB",
+      "WR",
+      "TE",
+      "K",
+      "DST"
+    ],
+    "weeks": [
+      1
     ]
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "season": 2026,
-  "title": "2026 Fantasy Football Rankings"
+  "title": "2026 Fantasy Football Rankings",
+  "weekly_order_by": "model_points",
+  "weekly_outcome_thresholds": {
+    "boom_prob": ">= 25",
+    "bust_prob": "<= 5",
+    "good_prob": ">= 10",
+    "great_prob": ">= 20"
+  }
 }

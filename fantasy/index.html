@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-65EVE9MKNL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-65EVE9MKNL');
+  </script>
+
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,6 +53,18 @@
 
         <!-- Controls -->
         <div class="fm-controls">
+          <div class="fm-scope-row">
+            <div class="fm-controlgroup">
+              <span class="fm-control-label">Rankings</span>
+              <div class="fm-seg" id="fmSegScope" role="group" aria-label="Rankings scope"></div>
+            </div>
+
+            <div class="fm-controlgroup is-hidden" id="fmWeekControl">
+              <label class="fm-control-label" for="fmWeek">Week</label>
+              <select class="fm-select" id="fmWeek" aria-label="Week"></select>
+            </div>
+          </div>
+
           <div class="fm-tabs" id="fmViewTabs" role="tablist" aria-label="Table view"></div>
 
           <div class="fm-control-row">
@@ -77,6 +98,7 @@
         <!-- Status bar -->
         <div class="fm-statusbar">
           <span class="fm-count" id="fmCount"></span>
+          <span class="fm-hint" id="fmHint"></span>
         </div>
 
         <!-- Message / loading / error / missing state -->
@@ -88,11 +110,8 @@
         </div>
 
         <!-- Methodology -->
-        <p class="fm-method">
-          Overall ranks use simulation-based value over replacement for the selected
-          format, league size, and scoring. Position tables show rest-of-season PPG
-          distributions and top-k finish probabilities. Part of the
-          <a href="../Projects/index.html">Fantasy Measure</a> modeling project.
+        <p class="fm-method" id="fmMethod">
+          For more information, see <a href="../Projects/index.html">here</a>.
         </p>
       </section>
     </main>
