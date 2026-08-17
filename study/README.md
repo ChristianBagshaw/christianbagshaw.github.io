@@ -1,45 +1,23 @@
-# LaTeX Flashcards
+# Flashcards
 
-Static flashcard site with MathJax, topic stacks, sub-stacks, browse mode, and study mode.
+Mobile-friendly MathJax flashcards for the `ds-study` deck.
 
-## Add cards
+## Data source
 
-Edit `cards.json`. The structure is two levels deep: topics contain stacks, and stacks contain cards.
+The study page reads one file: `study/cards.tsv`.
 
-```json
-[
-  {
-    "topic": "Machine Learning",
-    "stacks": [
-      {
-        "name": "Optimisation",
-        "description": "Core update rules.",
-        "cards": [
-          {
-            "front": "Question here",
-            "back": "Answer with \\(x^2\\) or \\[x^2 + y^2 = z^2\\]"
-          }
-        ]
-      }
-    ]
-  }
-]
-```
+`ds-study/flashcards/cards.tsv` is the canonical source of truth. Because `ds-study` is private while this GitHub Pages site is public, the browser cannot fetch the private repository directly without exposing credentials. `study/cards.tsv` is therefore a published mirror of the canonical deck.
 
-## Run locally
+When the study system commits cards, the mirror should be refreshed from the canonical TSV. Do not edit card content in this repository independently.
 
-Use any tiny local server:
-
-```bash
-python -m http.server 8000
-```
-
-Then open:
+Expected columns:
 
 ```text
-http://localhost:8000
+ID	Front	Back	Tags	Topic	Subtopic	Type	Added	Session
 ```
 
-## GitHub Pages
+Math uses MathJax-compatible LaTeX. Use `<br>` instead of literal line breaks inside TSV fields.
 
-Put these files in a public repo, then enable GitHub Pages for the repo.
+## UI
+
+The page groups cards by `Topic` and `Subtopic`. On phones, use the stack selector at the top. Study mode supports tap-to-reveal and swipe navigation.

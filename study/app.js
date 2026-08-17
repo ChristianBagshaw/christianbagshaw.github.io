@@ -35,20 +35,14 @@ stackSelect.addEventListener('change', () => {
 });
 
 async function loadDeck() {
-  setStatus('Loading stacks...');
+  setStatus('Loading cards...');
 
   try {
-    const index = await fetch('cards/index.json').then(r => {
-      if (!r.ok) throw new Error(`Could not load cards/index.json (${r.status})`);
-      return r.json();
-    });
+    const response = await fetch('cards.tsv', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Could not load cards.tsv (${response.status})`);
 
-    deck = await Promise.all(
-      index.map(file => fetch(`cards/${file}`).then(r => {
-        if (!r.ok) throw new Error(`Could not load cards/${file} (${r.status})`);
-        return r.json();
-      }))
-    );
+    const rows = parseTsv(await response.text());
+    deck = buildDeck(rows);
 
     if (!deck.length) {
       showEmptyState();
@@ -58,13 +52,85 @@ async function loadDeck() {
     selectStack(0, 0);
     setStatus('');
   } catch (error) {
-    stackTitle.textContent = 'Could not load stacks';
-    stackMeta.textContent = 'Run a local server, then refresh this page.';
-    browseView.innerHTML = `<div class="empty-state">${error.message}</div>`;
+    stackTitle.textContent = 'Could not load cards';
+    stackMeta.textContent = 'The flashcard TSV could not be loaded.';
+    browseView.innerHTML = `<div class="empty-state">${escapeHtml(error.message)}</div>`;
     setStatus('');
   }
 }
 
+function parseTsv(text) {
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim() !== '');
+  if (!lines.length) return [];
+
+  const headers = lines[0].split('\t').map(value => value.trim());
+  const required = ['ID', 'Front', 'Back', 'Topic', 'Subtopic'];
+  const missing = required.filter(name => !headers.includes(name));
+  if (missing.length) throw new Error(`cards.tsv is missing columns: ${missing.join(', ')}`);
+
+  return lines.slice(1).map((line, index) => {
+    const values = line.split('\t');
+    if (values.length !== headers.length) {
+      throw new Error(`Malformed cards.tsv row ${index + 2}`);
+    }
+
+    return Object.fromEntries(headers.map((header, i) => [header, values[i] ?? '']));
+  });
+}
+
+function buildDeck(rows) {
+  const topics = new Map();
+
+  for (const row of rows) {
+    const frontText = (row.Front || '').trim();
+    const backText = (row.Back || '').trim();
+    if (!frontText || !backText) continue;
+
+    const topicName = (row.Topic || '').trim() || 'General';
+    const stackName = (row.Subtopic || '').trim() || 'General';
+
+    if (!topics.has(topicName)) topics.set(topicName, new Map());
+    const stacks = topics.get(topicName);
+    if (!stacks.has(stackName)) stacks.set(stackName, []);
+
+    stacks.get(stackName).push({
+      id: (row.ID || '').trim(),
+      front: frontText,
+      back: backText,
+      tags: (row.Tags || '').trim(),
+      type: (row.Type || '').trim(),
+      added: (row.Added || '').trim(),
+      session: (row.Session || '').trim()
+    });
+  }
+
+  return [...topics.entries()].map(([topic, stacks]) => {
+    const groupedStacks = [...stacks.entries()].map(([name, cards]) => ({
+      name,
+      description: 'Synced from the ds-study flashcard deck.',
+      cards
+    }));
+
+    if (groupedStacks.length > 1) {
+      groupedStacks.unshift({
+        name: 'All cards',
+        description: 'All active cards in this topic.',
+        cards: groupedStacks.flatMap(stack => stack.cards)
+      });
+    }
+
+    return { topic, stacks: groupedStacks };
+  });
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
 function instantUnflip() {
   studyCard.style.transition = 'none';
@@ -100,10 +166,10 @@ function render() {
 
 function renderStackSelect() {
   stackSelect.innerHTML = deck.map((topic, ti) => `
-    <optgroup label="${topic.topic}">
+    <optgroup label="${escapeHtml(topic.topic)}">
       ${topic.stacks.map((stack, si) => `
         <option value="${ti}-${si}" ${ti === selectedTopic && si === selectedStack ? 'selected' : ''}>
-          ${stack.name}
+          ${escapeHtml(stack.name)}
         </option>
       `).join('')}
     </optgroup>
@@ -118,7 +184,7 @@ function renderStackList() {
 
       return `
         <button class="stack-button ${active ? 'active' : ''}" type="button" data-topic="${topicIndex}" data-stack="${stackIndex}">
-          <span>${stack.name}</span>
+          <span>${escapeHtml(stack.name)}</span>
           <small>${count} ${count === 1 ? 'card' : 'cards'}</small>
         </button>
       `;
@@ -126,7 +192,7 @@ function renderStackList() {
 
     return `
       <section class="topic-group">
-        <h3>${topic.topic}</h3>
+        <h3>${escapeHtml(topic.topic)}</h3>
         ${stacks}
       </section>
     `;
@@ -146,7 +212,7 @@ function renderHeader() {
 
   crumb.textContent = topic.topic;
   stackTitle.textContent = stack.name;
-  stackMeta.textContent = `${count} ${count === 1 ? 'card' : 'cards'} - ${stack.description || 'No description yet.'}`;
+  stackMeta.textContent = `${count} ${count === 1 ? 'card' : 'cards'} · ${stack.description}`;
 }
 
 function renderMode() {
@@ -168,7 +234,7 @@ function renderBrowse() {
       </div>
       <div class="mini-face mini-back-face">
         <span class="mini-card-number">${index + 1}</span>
-        <p class="mini-answer">${card.back}</p>
+        <div class="mini-answer">${card.back}</div>
       </div>
     </button>
   `).join('');
@@ -205,7 +271,6 @@ function renderStudy() {
 
 function showAnswer() {
   if (mode !== 'study' || !studyCards.length) return;
-
   showingBack = !showingBack;
   renderStudy();
   typesetMath();
@@ -213,7 +278,6 @@ function showAnswer() {
 
 function nextCard() {
   if (mode !== 'study' || !studyCards.length) return;
-
   showingBack = false;
   instantUnflip();
   cardIndex = (cardIndex + 1) % studyCards.length;
@@ -224,7 +288,6 @@ function nextCard() {
 
 function prevCard() {
   if (mode !== 'study' || !studyCards.length) return;
-
   showingBack = false;
   instantUnflip();
   cardIndex = (cardIndex - 1 + studyCards.length) % studyCards.length;
@@ -235,7 +298,6 @@ function prevCard() {
 
 function animateCard(direction) {
   studyCard.classList.remove('slide-next', 'slide-prev');
-  // Force a reflow so re-adding the class restarts the animation.
   void studyCard.offsetWidth;
   studyCard.classList.add(direction === 'prev' ? 'slide-prev' : 'slide-next');
 }
@@ -268,10 +330,11 @@ function getCurrentStack() {
 }
 
 function showEmptyState() {
-  crumb.textContent = 'No deck';
-  stackTitle.textContent = 'No stacks yet';
-  stackMeta.textContent = 'Add topic files to cards/ and list them in cards/index.json.';
-  browseView.innerHTML = '<div class="empty-state">cards.json is empty.</div>';
+  crumb.textContent = 'No cards';
+  stackTitle.textContent = 'Deck is empty';
+  stackMeta.textContent = 'No active cards were found in cards.tsv.';
+  browseView.innerHTML = '<div class="empty-state">Add cards in ds-study, then publish the TSV mirror.</div>';
+  stackSelect.innerHTML = '';
   setStatus('');
 }
 
@@ -325,7 +388,6 @@ document.getElementById('reset').onclick = resetCards;
 showButton.onclick = showAnswer;
 studyCard.onclick = showAnswer;
 
-// Touch swipe navigation
 let touchStartX = 0;
 let touchStartY = 0;
 let didSwipe = false;
@@ -357,11 +419,9 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     showAnswer();
   }
-
   if (e.key === 'ArrowRight') nextCard();
   if (e.key === 'ArrowLeft') prevCard();
 });
 
 window.addEventListener('load', typesetMath);
-
 loadDeck();
