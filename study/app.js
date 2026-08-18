@@ -32,7 +32,6 @@ const stackSelect = document.getElementById('stack-select');
 const topicView = document.getElementById('topic-view');
 const subtopicView = document.getElementById('subtopic-view');
 const modeSwitch = document.getElementById('mode-switch');
-const levelBack = document.getElementById('level-back');
 
 stackSelect.addEventListener('change', () => {
   const [kind, ti, si] = stackSelect.value.split('-');
@@ -162,6 +161,10 @@ function selectStack(topicIndex, stackIndex, nextMode = mode) {
 }
 
 function selectTopic(topicIndex) {
+  if (level !== 'topics' && selectedTopic === topicIndex) {
+    showTopics();
+    return;
+  }
   selectedTopic = topicIndex;
   selectedStack = 0;
   level = 'subtopics';
@@ -200,20 +203,37 @@ function renderStackSelect() {
 
 function renderStackList() {
   stackList.innerHTML = deck.map((topic, topicIndex) => {
+    const expanded = level !== 'topics' && topicIndex === selectedTopic;
     const count = topic.stacks[0]?.name === 'All cards'
       ? topic.stacks[0].cards.length
       : topic.stacks.reduce((total, stack) => total + stack.cards.length, 0);
-    const active = level !== 'topics' && topicIndex === selectedTopic;
-    return `<button class="stack-button ${active ? 'active' : ''}" type="button" data-topic="${topicIndex}">
-      <span>${escapeHtml(topic.topic)}</span>
-      <small>${topic.stacks.length - (topic.stacks[0]?.name === 'All cards' ? 1 : 0)} subtopics · ${count} cards</small>
-    </button>`;
+    const subtopicCount = topic.stacks.length - (topic.stacks[0]?.name === 'All cards' ? 1 : 0);
+    const stacks = expanded ? `<div class="subtopic-list">
+      ${topic.stacks.map((stack, stackIndex) => {
+        const active = level === 'cards' && stackIndex === selectedStack;
+        return `<button class="stack-button subtopic-button ${active ? 'active' : ''}" type="button" data-stack="${stackIndex}">
+            <span>${escapeHtml(stack.name)}</span>
+            <small>${stack.cards.length} ${stack.cards.length === 1 ? 'card' : 'cards'}</small>
+          </button>`;
+      }).join('')}
+    </div>` : '';
+
+    return `<section class="topic-accordion">
+      <button class="topic-button ${expanded ? 'expanded' : ''}" type="button" data-topic="${topicIndex}" aria-expanded="${expanded}">
+        <span><strong>${escapeHtml(topic.topic)}</strong><small>${subtopicCount} ${subtopicCount === 1 ? 'subtopic' : 'subtopics'} · ${count} cards</small></span>
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      ${stacks}
+    </section>`;
   }).join('');
 
-  stackList.querySelectorAll('.stack-button').forEach((button) => {
+  stackList.querySelectorAll('[data-topic]').forEach((button) => {
     button.addEventListener('click', () => {
       selectTopic(Number(button.dataset.topic));
     });
+  });
+  stackList.querySelectorAll('[data-stack]').forEach((button) => {
+    button.addEventListener('click', () => selectStack(selectedTopic, Number(button.dataset.stack), 'browse'));
   });
 }
 
@@ -246,8 +266,6 @@ function renderMode() {
   browseToolbar.classList.toggle('hidden', !showingCards || mode !== 'browse');
   studyView.classList.toggle('hidden', !showingCards || mode !== 'study');
   modeSwitch.classList.toggle('hidden', !showingCards);
-  levelBack.classList.toggle('hidden', level === 'topics');
-  levelBack.querySelector('span').textContent = level === 'cards' ? deck[selectedTopic].topic : 'Topics';
   browseModeButton.classList.toggle('active', mode === 'browse');
   studyModeButton.classList.toggle('active', mode === 'study');
 }
@@ -257,28 +275,12 @@ function renderSelections() {
   subtopicView.classList.toggle('hidden', level !== 'subtopics');
 
   if (level === 'topics') {
-    topicView.innerHTML = deck.map((topic, topicIndex) => {
-      const subtopicCount = topic.stacks.length - (topic.stacks[0]?.name === 'All cards' ? 1 : 0);
-      const cardCount = topic.stacks[0]?.name === 'All cards' ? topic.stacks[0].cards.length : topic.stacks.reduce((sum, stack) => sum + stack.cards.length, 0);
-      return selectionButton(topic.topic, `${subtopicCount} ${subtopicCount === 1 ? 'subtopic' : 'subtopics'} · ${cardCount} cards`, 'topic', topicIndex);
-    }).join('');
+    topicView.innerHTML = '<div class="empty-state">Choose a topic from the sidebar to see its subtopics.</div>';
   }
 
   if (level === 'subtopics') {
-    subtopicView.innerHTML = deck[selectedTopic].stacks.map((stack, stackIndex) =>
-      selectionButton(stack.name, `${stack.cards.length} ${stack.cards.length === 1 ? 'card' : 'cards'}`, 'stack', selectedTopic, stackIndex)
-    ).join('');
+    subtopicView.innerHTML = '<div class="empty-state">Choose a subtopic from the sidebar to view its cards.</div>';
   }
-
-  document.querySelectorAll('[data-select="topic"]').forEach(button => button.addEventListener('click', () => selectTopic(Number(button.dataset.topic))));
-  document.querySelectorAll('[data-select="stack"]').forEach(button => button.addEventListener('click', () => selectStack(Number(button.dataset.topic), Number(button.dataset.stack), 'browse')));
-}
-
-function selectionButton(title, meta, kind, topicIndex, stackIndex = '') {
-  return `<button class="selection-card" type="button" data-select="${kind}" data-topic="${topicIndex}" data-stack="${stackIndex}">
-    <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(meta)}</small></span>
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-  </button>`;
 }
 
 function renderBrowse() {
@@ -414,11 +416,6 @@ browseModeButton.addEventListener('click', () => {
 studyModeButton.addEventListener('click', () => {
   mode = 'study';
   render();
-});
-
-levelBack.addEventListener('click', () => {
-  if (level === 'cards') selectTopic(selectedTopic);
-  else showTopics();
 });
 
 toggleAnswersButton.addEventListener('click', () => {

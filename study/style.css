@@ -143,9 +143,48 @@
 
 .stack-list {
   display: grid;
-  gap: 18px;
+  gap: 7px;
   margin-top: 18px;
 }
+
+.topic-accordion {
+  display: grid;
+  gap: 5px;
+}
+
+.topic-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--ease), border-color var(--ease);
+}
+
+.topic-button:hover { background: var(--surface-tint); }
+.topic-button.expanded { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 25%, var(--line)); }
+.topic-button > span { display: grid; gap: 3px; }
+.topic-button strong { font-size: 0.95rem; font-weight: 600; }
+.topic-button small { color: var(--text-soft); font-size: 0.76rem; }
+.topic-button svg { flex: 0 0 auto; color: var(--text-soft); transition: transform var(--ease); }
+.topic-button.expanded svg { transform: rotate(180deg); }
+
+.subtopic-list {
+  display: grid;
+  gap: 4px;
+  padding-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+
+.subtopic-button { padding-block: 8px; }
 
 .topic-group {
   display: grid;
