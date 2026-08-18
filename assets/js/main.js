@@ -66,6 +66,8 @@ function getCurrentPageName() {
     return 'teaching';
   } else if (currentPath.includes('/fantasy/') || currentPath.endsWith('/fantasy')) {
     return 'fantasy';
+  } else if (currentPath.includes('/study/') || currentPath.endsWith('/study')) {
+    return 'study';
   } else {
     return 'home';
   }
@@ -77,7 +79,7 @@ function createSidebar() {
 
   // Detect if we're in a subfolder by checking the current path
   const currentPath = window.location.pathname;
-  const isInSubfolder = currentPath.includes('/Research/') || currentPath.includes('/Projects/') || currentPath.includes('/Talks/') || currentPath.includes('/Teaching/') || currentPath.includes('/fantasy/');
+  const isInSubfolder = currentPath.includes('/Research/') || currentPath.includes('/Projects/') || currentPath.includes('/Talks/') || currentPath.includes('/Teaching/') || currentPath.includes('/fantasy/') || currentPath.includes('/study/');
 
   // Adjust paths based on folder location
   const homeLink = isInSubfolder ? '../index.html' : 'index.html';
@@ -86,6 +88,7 @@ function createSidebar() {
   const talksLink = isInSubfolder ? (currentPath.includes('/Talks/') ? 'index.html' : '../Talks/index.html') : 'Talks/index.html';
   const teachingLink = isInSubfolder ? (currentPath.includes('/Teaching/') ? 'index.html' : '../Teaching/index.html') : 'Teaching/index.html';
   const fantasyLink = isInSubfolder ? (currentPath.includes('/fantasy/') ? 'index.html' : '../fantasy/index.html') : 'fantasy/index.html';
+  const studyLink = isInSubfolder ? (currentPath.includes('/study/') ? 'index.html' : '../study/index.html') : 'study/index.html';
   const profileImage = isInSubfolder ? '../assets/img/profile.png' : 'assets/img/profile.png';
 
   const sidebarHTML = `
@@ -125,6 +128,7 @@ function createSidebar() {
           <a href="${researchLink}" class="nav-link" data-page="research">Research</a>
           <a href="${projectsLink}" class="nav-link" data-page="projects">Projects</a>
           <a href="${talksLink}" class="nav-link" data-page="talks">Talks</a>
+          <a href="${studyLink}" class="nav-link" data-page="study" style="grid-column: 1 / -1;">Study</a>
           <a href="${fantasyLink}" class="nav-link" data-page="fantasy" style="grid-column: 1 / -1;">Fantasy Football Projections</a>
         </div>
       </nav>

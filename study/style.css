@@ -614,7 +614,7 @@
 .study-card {
   position: relative;
   z-index: 1;
-  height: min(420px, 48vh);
+  height: min(560px, 62vh);
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -628,7 +628,9 @@
   position: absolute;
   inset: 0;
   display: grid;
-  align-content: center;
+  /* Fall back to top alignment, then centre only when the content fits. */
+  align-content: start;
+  align-content: safe center;
   justify-items: center;
   gap: 22px;
   padding: clamp(26px, 5vw, 54px);
@@ -639,6 +641,7 @@
   text-align: center;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   transform: rotateY(0deg);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -862,7 +865,7 @@ mjx-container > svg {
   }
 
   .study-card {
-    height: min(52vh, 460px);
+    height: min(62vh, 520px);
   }
 
   /* No keyboard on mobile */
