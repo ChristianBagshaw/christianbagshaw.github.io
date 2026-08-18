@@ -6,6 +6,7 @@ let originalCards = [];
 let cardIndex = 0;
 let showingBack = false;
 let mode = 'browse';
+let level = 'topics';
 let showBrowseAnswers = false;
 let largeBrowseCards = false;
 
@@ -28,10 +29,15 @@ const browseToolbar = document.getElementById('browse-toolbar');
 const toggleAnswersButton = document.getElementById('toggle-answers');
 const toggleSizeButton = document.getElementById('toggle-size');
 const stackSelect = document.getElementById('stack-select');
+const topicView = document.getElementById('topic-view');
+const subtopicView = document.getElementById('subtopic-view');
+const modeSwitch = document.getElementById('mode-switch');
+const levelBack = document.getElementById('level-back');
 
 stackSelect.addEventListener('change', () => {
-  const [ti, si] = stackSelect.value.split('-').map(Number);
-  selectStack(ti, si);
+  const [kind, ti, si] = stackSelect.value.split('-');
+  if (kind === 'topic') selectTopic(Number(ti));
+  if (kind === 'stack') selectStack(Number(ti), Number(si));
 });
 
 async function loadDeck() {
@@ -49,7 +55,7 @@ async function loadDeck() {
       return;
     }
 
-    selectStack(0, 0);
+    render();
     setStatus('');
   } catch (error) {
     stackTitle.textContent = 'Could not load cards';
@@ -150,7 +156,20 @@ function selectStack(topicIndex, stackIndex, nextMode = mode) {
   showingBack = false;
   instantUnflip();
   mode = nextMode;
+  level = 'cards';
 
+  render();
+}
+
+function selectTopic(topicIndex) {
+  selectedTopic = topicIndex;
+  selectedStack = 0;
+  level = 'subtopics';
+  render();
+}
+
+function showTopics() {
+  level = 'topics';
   render();
 }
 
@@ -159,54 +178,60 @@ function render() {
   renderStackSelect();
   renderHeader();
   renderMode();
-  renderBrowse();
-  renderStudy();
+  renderSelections();
+  if (level === 'cards') {
+    renderBrowse();
+    renderStudy();
+  }
   typesetMath();
 }
 
 function renderStackSelect() {
-  stackSelect.innerHTML = deck.map((topic, ti) => `
-    <optgroup label="${escapeHtml(topic.topic)}">
-      ${topic.stacks.map((stack, si) => `
-        <option value="${ti}-${si}" ${ti === selectedTopic && si === selectedStack ? 'selected' : ''}>
-          ${escapeHtml(stack.name)}
-        </option>
-      `).join('')}
-    </optgroup>
-  `).join('');
+  if (level === 'topics') {
+    stackSelect.innerHTML = '<option value="">Choose a topic</option>' + deck.map((topic, ti) =>
+      `<option value="topic-${ti}">${escapeHtml(topic.topic)}</option>`
+    ).join('');
+  } else {
+    const topic = deck[selectedTopic];
+    stackSelect.innerHTML = `<option value="topic-${selectedTopic}">${escapeHtml(topic.topic)} — choose a subtopic</option>` +
+      topic.stacks.map((stack, si) => `<option value="stack-${selectedTopic}-${si}" ${level === 'cards' && si === selectedStack ? 'selected' : ''}>${escapeHtml(stack.name)}</option>`).join('');
+  }
 }
 
 function renderStackList() {
   stackList.innerHTML = deck.map((topic, topicIndex) => {
-    const stacks = topic.stacks.map((stack, stackIndex) => {
-      const active = topicIndex === selectedTopic && stackIndex === selectedStack;
-      const count = stack.cards.length;
-
-      return `
-        <button class="stack-button ${active ? 'active' : ''}" type="button" data-topic="${topicIndex}" data-stack="${stackIndex}">
-          <span>${escapeHtml(stack.name)}</span>
-          <small>${count} ${count === 1 ? 'card' : 'cards'}</small>
-        </button>
-      `;
-    }).join('');
-
-    return `
-      <section class="topic-group">
-        <h3>${escapeHtml(topic.topic)}</h3>
-        ${stacks}
-      </section>
-    `;
+    const count = topic.stacks[0]?.name === 'All cards'
+      ? topic.stacks[0].cards.length
+      : topic.stacks.reduce((total, stack) => total + stack.cards.length, 0);
+    const active = level !== 'topics' && topicIndex === selectedTopic;
+    return `<button class="stack-button ${active ? 'active' : ''}" type="button" data-topic="${topicIndex}">
+      <span>${escapeHtml(topic.topic)}</span>
+      <small>${topic.stacks.length - (topic.stacks[0]?.name === 'All cards' ? 1 : 0)} subtopics · ${count} cards</small>
+    </button>`;
   }).join('');
 
   stackList.querySelectorAll('.stack-button').forEach((button) => {
     button.addEventListener('click', () => {
-      selectStack(Number(button.dataset.topic), Number(button.dataset.stack), 'browse');
+      selectTopic(Number(button.dataset.topic));
     });
   });
 }
 
 function renderHeader() {
+  if (level === 'topics') {
+    crumb.textContent = 'Study library';
+    stackTitle.textContent = 'Choose a topic';
+    stackMeta.textContent = 'Pick a subject to see its subtopics and study decks.';
+    return;
+  }
+
   const topic = deck[selectedTopic];
+  if (level === 'subtopics') {
+    crumb.textContent = 'Topic';
+    stackTitle.textContent = topic.topic;
+    stackMeta.textContent = 'Choose a subtopic to browse its cards or start studying.';
+    return;
+  }
   const stack = getCurrentStack();
   const count = stack.cards.length;
 
@@ -216,11 +241,44 @@ function renderHeader() {
 }
 
 function renderMode() {
-  browseView.classList.toggle('hidden', mode !== 'browse');
-  browseToolbar.classList.toggle('hidden', mode !== 'browse');
-  studyView.classList.toggle('hidden', mode !== 'study');
+  const showingCards = level === 'cards';
+  browseView.classList.toggle('hidden', !showingCards || mode !== 'browse');
+  browseToolbar.classList.toggle('hidden', !showingCards || mode !== 'browse');
+  studyView.classList.toggle('hidden', !showingCards || mode !== 'study');
+  modeSwitch.classList.toggle('hidden', !showingCards);
+  levelBack.classList.toggle('hidden', level === 'topics');
+  levelBack.querySelector('span').textContent = level === 'cards' ? deck[selectedTopic].topic : 'Topics';
   browseModeButton.classList.toggle('active', mode === 'browse');
   studyModeButton.classList.toggle('active', mode === 'study');
+}
+
+function renderSelections() {
+  topicView.classList.toggle('hidden', level !== 'topics');
+  subtopicView.classList.toggle('hidden', level !== 'subtopics');
+
+  if (level === 'topics') {
+    topicView.innerHTML = deck.map((topic, topicIndex) => {
+      const subtopicCount = topic.stacks.length - (topic.stacks[0]?.name === 'All cards' ? 1 : 0);
+      const cardCount = topic.stacks[0]?.name === 'All cards' ? topic.stacks[0].cards.length : topic.stacks.reduce((sum, stack) => sum + stack.cards.length, 0);
+      return selectionButton(topic.topic, `${subtopicCount} ${subtopicCount === 1 ? 'subtopic' : 'subtopics'} · ${cardCount} cards`, 'topic', topicIndex);
+    }).join('');
+  }
+
+  if (level === 'subtopics') {
+    subtopicView.innerHTML = deck[selectedTopic].stacks.map((stack, stackIndex) =>
+      selectionButton(stack.name, `${stack.cards.length} ${stack.cards.length === 1 ? 'card' : 'cards'}`, 'stack', selectedTopic, stackIndex)
+    ).join('');
+  }
+
+  document.querySelectorAll('[data-select="topic"]').forEach(button => button.addEventListener('click', () => selectTopic(Number(button.dataset.topic))));
+  document.querySelectorAll('[data-select="stack"]').forEach(button => button.addEventListener('click', () => selectStack(Number(button.dataset.topic), Number(button.dataset.stack), 'browse')));
+}
+
+function selectionButton(title, meta, kind, topicIndex, stackIndex = '') {
+  return `<button class="selection-card" type="button" data-select="${kind}" data-topic="${topicIndex}" data-stack="${stackIndex}">
+    <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(meta)}</small></span>
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+  </button>`;
 }
 
 function renderBrowse() {
@@ -358,6 +416,11 @@ studyModeButton.addEventListener('click', () => {
   render();
 });
 
+levelBack.addEventListener('click', () => {
+  if (level === 'cards') selectTopic(selectedTopic);
+  else showTopics();
+});
+
 toggleAnswersButton.addEventListener('click', () => {
   showBrowseAnswers = !showBrowseAnswers;
   applyBrowseAnswers();
@@ -415,6 +478,8 @@ studyCard.addEventListener('touchend', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
+  if (level !== 'cards' || mode !== 'study') return;
+  if (['BUTTON', 'SELECT'].includes(document.activeElement?.tagName)) return;
   if (e.key === ' ') {
     e.preventDefault();
     showAnswer();

@@ -57,7 +57,7 @@
   </header>
 
   <main class="app-shell">
-    <aside class="library" aria-label="Flashcard stacks">
+    <aside class="library" aria-label="Flashcard topics">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
@@ -73,12 +73,17 @@
         </div>
       </div>
 
-      <nav id="stack-list" class="stack-list" aria-label="Stacks"></nav>
+      <nav id="stack-list" class="stack-list" aria-label="Topics"></nav>
     </aside>
 
     <section class="workspace">
       <header class="workspace-header">
         <div class="workspace-heading">
+          <button id="level-back" class="level-back hidden" type="button">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+            <span>Topics</span>
+          </button>
           <p id="crumb" class="crumb">Loading</p>
           <h2 id="stack-title">Stacks</h2>
           <p id="stack-meta" class="stack-meta">Choose a stack to begin.</p>
@@ -86,11 +91,14 @@
 
         <select id="stack-select" class="stack-select" aria-label="Choose stack"></select>
 
-        <div class="mode-switch" role="tablist" aria-label="View mode">
+        <div id="mode-switch" class="mode-switch" role="tablist" aria-label="View mode">
           <button id="browse-mode" type="button" role="tab" class="active">All cards</button>
           <button id="study-mode" type="button" role="tab">Study</button>
         </div>
       </header>
+
+      <div id="topic-view" class="selection-grid" aria-label="Topics"></div>
+      <div id="subtopic-view" class="selection-grid hidden" aria-label="Subtopics"></div>
 
       <div id="browse-toolbar" class="browse-toolbar">
         <button id="toggle-size" class="ghost-btn" type="button" aria-pressed="false">
