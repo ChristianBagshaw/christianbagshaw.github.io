@@ -1,5 +1,4 @@
 let deck = [];
-let selectedTopic = 0;
 let selectedStack = 0;
 let studyCards = [];
 let originalCards = [];
@@ -9,47 +8,35 @@ let mode = 'browse';
 let showBrowseAnswers = false;
 let largeBrowseCards = false;
 
-const stackList = document.getElementById('stack-list');
-const crumb = document.getElementById('crumb');
-const stackTitle = document.getElementById('stack-title');
-const stackMeta = document.getElementById('stack-meta');
-const browseView = document.getElementById('browse-view');
-const studyView = document.getElementById('study-view');
-const browseModeButton = document.getElementById('browse-mode');
-const studyModeButton = document.getElementById('study-mode');
-const front = document.getElementById('front');
-const back = document.getElementById('back');
-const counter = document.getElementById('counter');
-const showButton = document.getElementById('show');
-const progressBar = document.getElementById('progress-bar');
-const statusText = document.getElementById('status');
-const studyCard = document.getElementById('study-card');
-const browseToolbar = document.getElementById('browse-toolbar');
-const toggleAnswersButton = document.getElementById('toggle-answers');
-const toggleSizeButton = document.getElementById('toggle-size');
-const stackSelect = document.getElementById('stack-select');
-
-stackSelect.addEventListener('change', () => {
-  const [ti, si] = stackSelect.value.split('-').map(Number);
-  selectStack(ti, si);
-});
+const $ = (id) => document.getElementById(id);
+const stackList = $('stack-list');
+const crumb = $('crumb');
+const stackTitle = $('stack-title');
+const stackMeta = $('stack-meta');
+const browseView = $('browse-view');
+const studyView = $('study-view');
+const browseModeButton = $('browse-mode');
+const studyModeButton = $('study-mode');
+const front = $('front');
+const back = $('back');
+const counter = $('counter');
+const showButton = $('show');
+const progressBar = $('progress-bar');
+const statusText = $('status');
+const studyCard = $('study-card');
+const browseToolbar = $('browse-toolbar');
+const toggleAnswersButton = $('toggle-answers');
+const toggleSizeButton = $('toggle-size');
+const stackSelect = $('stack-select');
 
 async function loadDeck() {
   setStatus('Loading cards...');
-
   try {
     const response = await fetch('cards.tsv', { cache: 'no-store' });
     if (!response.ok) throw new Error(`Could not load cards.tsv (${response.status})`);
-
-    const rows = parseTsv(await response.text());
-    deck = buildDeck(rows);
-
-    if (!deck.length) {
-      showEmptyState();
-      return;
-    }
-
-    selectStack(0, 0);
+    deck = buildDeck(parseTsv(await response.text()));
+    if (!deck.length) return showEmptyState();
+    selectStack(0);
     setStatus('');
   } catch (error) {
     stackTitle.textContent = 'Could not load cards';
@@ -60,67 +47,43 @@ async function loadDeck() {
 }
 
 function parseTsv(text) {
-  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim() !== '');
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim());
   if (!lines.length) return [];
-
-  const headers = lines[0].split('\t').map(value => value.trim());
-  const required = ['ID', 'Front', 'Back', 'Topic', 'Subtopic'];
-  const missing = required.filter(name => !headers.includes(name));
+  const headers = lines[0].split('\t').map(x => x.trim());
+  const required = ['ID', 'Front', 'Back', 'Topic'];
+  const missing = required.filter(x => !headers.includes(x));
   if (missing.length) throw new Error(`cards.tsv is missing columns: ${missing.join(', ')}`);
 
-  return lines.slice(1).map((line, index) => {
+  return lines.slice(1).map((line, i) => {
     const values = line.split('\t');
-    if (values.length !== headers.length) {
-      throw new Error(`Malformed cards.tsv row ${index + 2}`);
-    }
-
-    return Object.fromEntries(headers.map((header, i) => [header, values[i] ?? '']));
+    if (values.length !== headers.length) throw new Error(`Malformed cards.tsv row ${i + 2}`);
+    return Object.fromEntries(headers.map((header, j) => [header, values[j] ?? '']));
   });
 }
 
 function buildDeck(rows) {
   const topics = new Map();
-
   for (const row of rows) {
     const frontText = (row.Front || '').trim();
     const backText = (row.Back || '').trim();
     if (!frontText || !backText) continue;
-
-    const topicName = (row.Topic || '').trim() || 'General';
-    const stackName = (row.Subtopic || '').trim() || 'General';
-
-    if (!topics.has(topicName)) topics.set(topicName, new Map());
-    const stacks = topics.get(topicName);
-    if (!stacks.has(stackName)) stacks.set(stackName, []);
-
-    stacks.get(stackName).push({
+    const topic = (row.Topic || '').trim() || 'General';
+    if (!topics.has(topic)) topics.set(topic, []);
+    topics.get(topic).push({
       id: (row.ID || '').trim(),
       front: frontText,
       back: backText,
+      subtopic: (row.Subtopic || '').trim(),
       tags: (row.Tags || '').trim(),
       type: (row.Type || '').trim(),
-      added: (row.Added || '').trim(),
       session: (row.Session || '').trim()
     });
   }
-
-  return [...topics.entries()].map(([topic, stacks]) => {
-    const groupedStacks = [...stacks.entries()].map(([name, cards]) => ({
-      name,
-      description: 'Synced from the ds-study flashcard deck.',
-      cards
-    }));
-
-    if (groupedStacks.length > 1) {
-      groupedStacks.unshift({
-        name: 'All cards',
-        description: 'All active cards in this topic.',
-        cards: groupedStacks.flatMap(stack => stack.cards)
-      });
-    }
-
-    return { topic, stacks: groupedStacks };
-  });
+  return [...topics.entries()].map(([name, cards]) => ({
+    name,
+    description: 'All active cards in this topic.',
+    cards
+  }));
 }
 
 function escapeHtml(value) {
@@ -132,25 +95,14 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
-function instantUnflip() {
-  studyCard.style.transition = 'none';
-  studyCard.classList.remove('is-flipped');
-  void studyCard.offsetWidth;
-  studyCard.style.transition = '';
-}
-
-function selectStack(topicIndex, stackIndex, nextMode = mode) {
-  selectedTopic = topicIndex;
-  selectedStack = stackIndex;
-  const stack = getCurrentStack();
-
-  originalCards = [...stack.cards];
-  studyCards = [...stack.cards];
+function selectStack(index, nextMode = mode) {
+  selectedStack = index;
+  originalCards = [...deck[index].cards];
+  studyCards = [...deck[index].cards];
   cardIndex = 0;
   showingBack = false;
   instantUnflip();
   mode = nextMode;
-
   render();
 }
 
@@ -164,55 +116,34 @@ function render() {
   typesetMath();
 }
 
-function renderStackSelect() {
-  stackSelect.innerHTML = deck.map((topic, ti) => `
-    <optgroup label="${escapeHtml(topic.topic)}">
-      ${topic.stacks.map((stack, si) => `
-        <option value="${ti}-${si}" ${ti === selectedTopic && si === selectedStack ? 'selected' : ''}>
-          ${escapeHtml(stack.name)}
-        </option>
-      `).join('')}
-    </optgroup>
-  `).join('');
-}
-
 function renderStackList() {
-  stackList.innerHTML = deck.map((topic, topicIndex) => {
-    const stacks = topic.stacks.map((stack, stackIndex) => {
-      const active = topicIndex === selectedTopic && stackIndex === selectedStack;
-      const count = stack.cards.length;
-
-      return `
-        <button class="stack-button ${active ? 'active' : ''}" type="button" data-topic="${topicIndex}" data-stack="${stackIndex}">
+  stackList.innerHTML = `
+    <section class="topic-group">
+      <h3>Topics</h3>
+      ${deck.map((stack, i) => `
+        <button class="stack-button ${i === selectedStack ? 'active' : ''}" type="button" data-stack="${i}">
           <span>${escapeHtml(stack.name)}</span>
-          <small>${count} ${count === 1 ? 'card' : 'cards'}</small>
+          <small>${stack.cards.length} ${stack.cards.length === 1 ? 'card' : 'cards'}</small>
         </button>
-      `;
-    }).join('');
+      `).join('')}
+    </section>`;
 
-    return `
-      <section class="topic-group">
-        <h3>${escapeHtml(topic.topic)}</h3>
-        ${stacks}
-      </section>
-    `;
-  }).join('');
-
-  stackList.querySelectorAll('.stack-button').forEach((button) => {
-    button.addEventListener('click', () => {
-      selectStack(Number(button.dataset.topic), Number(button.dataset.stack), 'browse');
-    });
+  stackList.querySelectorAll('.stack-button').forEach(button => {
+    button.addEventListener('click', () => selectStack(Number(button.dataset.stack), 'browse'));
   });
 }
 
-function renderHeader() {
-  const topic = deck[selectedTopic];
-  const stack = getCurrentStack();
-  const count = stack.cards.length;
+function renderStackSelect() {
+  stackSelect.innerHTML = deck.map((stack, i) => `
+    <option value="${i}" ${i === selectedStack ? 'selected' : ''}>${escapeHtml(stack.name)}</option>
+  `).join('');
+}
 
-  crumb.textContent = topic.topic;
+function renderHeader() {
+  const stack = deck[selectedStack];
+  crumb.textContent = 'Topic';
   stackTitle.textContent = stack.name;
-  stackMeta.textContent = `${count} ${count === 1 ? 'card' : 'cards'} · ${stack.description}`;
+  stackMeta.textContent = `${stack.cards.length} ${stack.cards.length === 1 ? 'card' : 'cards'} · ${stack.description}`;
 }
 
 function renderMode() {
@@ -224,49 +155,36 @@ function renderMode() {
 }
 
 function renderBrowse() {
-  const stack = getCurrentStack();
-
-  browseView.innerHTML = stack.cards.map((card, index) => `
-    <button class="mini-card${showBrowseAnswers ? ' is-flipped' : ''}" type="button" data-index="${index}">
-      <div class="mini-face mini-front">
-        <span class="mini-card-number">${index + 1}</span>
-        <strong>${card.front}</strong>
-      </div>
-      <div class="mini-face mini-back-face">
-        <span class="mini-card-number">${index + 1}</span>
-        <div class="mini-answer">${card.back}</div>
-      </div>
+  const cards = deck[selectedStack].cards;
+  browseView.innerHTML = cards.map((card, i) => `
+    <button class="mini-card${showBrowseAnswers ? ' is-flipped' : ''}" type="button">
+      <div class="mini-face mini-front"><span class="mini-card-number">${i + 1}</span><strong>${card.front}</strong></div>
+      <div class="mini-face mini-back-face"><span class="mini-card-number">${i + 1}</span><div class="mini-answer">${card.back}</div></div>
     </button>
   `).join('');
-
   browseView.classList.toggle('large-cards', largeBrowseCards);
-
-  browseView.querySelectorAll('.mini-card').forEach((cardButton) => {
-    cardButton.addEventListener('click', () => {
-      cardButton.classList.toggle('is-flipped');
-      typesetMath();
-    });
-  });
+  browseView.querySelectorAll('.mini-card').forEach(card => card.addEventListener('click', () => {
+    card.classList.toggle('is-flipped');
+    typesetMath();
+  }));
 }
 
 function renderStudy() {
-  if (!studyCards.length) {
-    front.textContent = 'No cards in this stack yet.';
-    back.textContent = '';
-    counter.textContent = '0 / 0';
-    progressBar.style.width = '0%';
-    showButton.disabled = true;
-    return;
-  }
-
+  if (!studyCards.length) return;
   const current = studyCards[cardIndex];
   front.innerHTML = current.front;
   back.innerHTML = current.back;
   studyCard.classList.toggle('is-flipped', showingBack);
   showButton.textContent = showingBack ? 'Hide answer' : 'Show answer';
-  showButton.disabled = false;
   counter.textContent = `${cardIndex + 1} / ${studyCards.length}`;
   progressBar.style.width = `${((cardIndex + 1) / studyCards.length) * 100}%`;
+}
+
+function instantUnflip() {
+  studyCard.style.transition = 'none';
+  studyCard.classList.remove('is-flipped');
+  void studyCard.offsetWidth;
+  studyCard.style.transition = '';
 }
 
 function showAnswer() {
@@ -276,37 +194,17 @@ function showAnswer() {
   typesetMath();
 }
 
-function nextCard() {
+function moveCard(delta) {
   if (mode !== 'study' || !studyCards.length) return;
   showingBack = false;
   instantUnflip();
-  cardIndex = (cardIndex + 1) % studyCards.length;
+  cardIndex = (cardIndex + delta + studyCards.length) % studyCards.length;
   renderStudy();
   typesetMath();
-  animateCard('next');
-}
-
-function prevCard() {
-  if (mode !== 'study' || !studyCards.length) return;
-  showingBack = false;
-  instantUnflip();
-  cardIndex = (cardIndex - 1 + studyCards.length) % studyCards.length;
-  renderStudy();
-  typesetMath();
-  animateCard('prev');
-}
-
-function animateCard(direction) {
-  studyCard.classList.remove('slide-next', 'slide-prev');
-  void studyCard.offsetWidth;
-  studyCard.classList.add(direction === 'prev' ? 'slide-prev' : 'slide-next');
 }
 
 function shuffleCards() {
-  studyCards = [...studyCards]
-    .map((card) => ({ card, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ card }) => card);
+  studyCards = [...studyCards].sort(() => Math.random() - 0.5);
   cardIndex = 0;
   showingBack = false;
   instantUnflip();
@@ -325,102 +223,46 @@ function resetCards() {
   typesetMath();
 }
 
-function getCurrentStack() {
-  return deck[selectedTopic].stacks[selectedStack];
-}
-
 function showEmptyState() {
   crumb.textContent = 'No cards';
   stackTitle.textContent = 'Deck is empty';
   stackMeta.textContent = 'No active cards were found in cards.tsv.';
-  browseView.innerHTML = '<div class="empty-state">Add cards in ds-study, then publish the TSV mirror.</div>';
+  browseView.innerHTML = '<div class="empty-state">Add cards in ds-study, then publish the TSV copy.</div>';
   stackSelect.innerHTML = '';
   setStatus('');
 }
 
-function setStatus(message) {
-  statusText.textContent = message;
-}
+function setStatus(message) { statusText.textContent = message; }
+function typesetMath() { if (window.MathJax?.typesetPromise) MathJax.typesetPromise(); }
 
-function typesetMath() {
-  if (window.MathJax?.typesetPromise) {
-    MathJax.typesetPromise();
-  }
-}
-
-browseModeButton.addEventListener('click', () => {
-  mode = 'browse';
-  render();
-});
-
-studyModeButton.addEventListener('click', () => {
-  mode = 'study';
-  render();
-});
-
-toggleAnswersButton.addEventListener('click', () => {
-  showBrowseAnswers = !showBrowseAnswers;
-  applyBrowseAnswers();
-});
-
+stackSelect.addEventListener('change', () => selectStack(Number(stackSelect.value)));
+browseModeButton.addEventListener('click', () => { mode = 'browse'; render(); });
+studyModeButton.addEventListener('click', () => { mode = 'study'; render(); });
+toggleAnswersButton.addEventListener('click', () => { showBrowseAnswers = !showBrowseAnswers; renderBrowse(); typesetMath(); });
 toggleSizeButton.addEventListener('click', () => {
   largeBrowseCards = !largeBrowseCards;
-  browseView.classList.toggle('large-cards', largeBrowseCards);
-  toggleSizeButton.setAttribute('aria-pressed', String(largeBrowseCards));
+  renderBrowse();
   const label = toggleSizeButton.querySelector('span');
   if (label) label.textContent = largeBrowseCards ? 'Compact' : 'Large';
 });
-
-function applyBrowseAnswers() {
-  browseView.querySelectorAll('.mini-card').forEach((card) => {
-    card.classList.toggle('is-flipped', showBrowseAnswers);
-  });
-  toggleAnswersButton.classList.toggle('is-hidden', !showBrowseAnswers);
-  toggleAnswersButton.setAttribute('aria-pressed', String(showBrowseAnswers));
-  const label = toggleAnswersButton.querySelector('.toggle-label');
-  if (label) label.textContent = showBrowseAnswers ? 'Hide answers' : 'Show answers';
-}
-
-document.getElementById('next').onclick = nextCard;
-document.getElementById('prev').onclick = prevCard;
-document.getElementById('shuffle').onclick = shuffleCards;
-document.getElementById('reset').onclick = resetCards;
+$('next').onclick = () => moveCard(1);
+$('prev').onclick = () => moveCard(-1);
+$('shuffle').onclick = shuffleCards;
+$('reset').onclick = resetCards;
 showButton.onclick = showAnswer;
 studyCard.onclick = showAnswer;
 
 let touchStartX = 0;
-let touchStartY = 0;
-let didSwipe = false;
-
-studyCard.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-  didSwipe = false;
-}, { passive: true });
-
-studyCard.addEventListener('touchmove', (e) => {
-  const dx = Math.abs(e.touches[0].clientX - touchStartX);
-  const dy = Math.abs(e.touches[0].clientY - touchStartY);
-  if (dx > dy && dx > 8) didSwipe = true;
-}, { passive: true });
-
-studyCard.addEventListener('touchend', (e) => {
-  if (!didSwipe) return;
+studyCard.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+studyCard.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
-  if (Math.abs(dx) > 44) {
-    e.preventDefault();
-    dx < 0 ? nextCard() : prevCard();
-  }
-  didSwipe = false;
-});
+  if (Math.abs(dx) > 44) dx < 0 ? moveCard(1) : moveCard(-1);
+}, { passive: true });
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === ' ') {
-    e.preventDefault();
-    showAnswer();
-  }
-  if (e.key === 'ArrowRight') nextCard();
-  if (e.key === 'ArrowLeft') prevCard();
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') { e.preventDefault(); showAnswer(); }
+  if (e.key === 'ArrowRight') moveCard(1);
+  if (e.key === 'ArrowLeft') moveCard(-1);
 });
 
 window.addEventListener('load', typesetMath);

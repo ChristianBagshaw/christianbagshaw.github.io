@@ -32,8 +32,10 @@ Expected columns:
 ID	Front	Back	Tags	Topic	Subtopic	Type	Added	Session
 ```
 
+`Topic` controls the website deck grouping. `Subtopic` and `Session` are retained as metadata but do not create separate stacks on the site.
+
 Math uses MathJax-compatible LaTeX. Use `<br>` instead of literal line breaks inside TSV fields.
 
 ## UI
 
-The page groups cards by `Topic` and `Subtopic`. On phones, use the stack selector at the top. Study mode supports tap-to-reveal and swipe navigation.
+The page shows one deck per `Topic`. On phones, use the topic selector at the top. Study mode supports tap-to-reveal and swipe navigation.
