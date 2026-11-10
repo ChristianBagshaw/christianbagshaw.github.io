@@ -21,7 +21,9 @@
 
   // ---- State --------------------------------------------------------------
   let manifest = null;
+  let overallPaths = new Map();
   let overallKeys = new Set();   // `${format}_${size}_${scoring}`
+  let positionPaths = new Map();
   let positionKeys = new Set();  // `${scoring}_${position}`
   let weeklyPaths = new Map();   // `${week}_${scoring}_${position}` -> path
   const cache = new Map();       // path -> Promise<data>
@@ -116,12 +118,17 @@
     manifest = await res.json();
 
     (manifest.datasets?.overall || []).forEach((d) => {
+      if (d.season !== manifest.season) return;
       overallKeys.add(`${d.format}_${d.league_size}_${d.scoring}`);
+      overallPaths.set(`${d.anchor_week}_${d.format}_${d.league_size}_${d.scoring}`, d.path);
     });
     (manifest.datasets?.positions || []).forEach((d) => {
+      if (d.season !== manifest.season) return;
       positionKeys.add(`${d.scoring}_${d.position}`);
+      positionPaths.set(`${d.anchor_week}_${d.scoring}_${d.position}`, d.path);
     });
     (manifest.datasets?.weekly || []).forEach((d) => {
+      if (d.season !== manifest.season) return;
       weeklyPaths.set(`${d.week}_${d.scoring}_${d.position}`, d.path);
     });
     return manifest;
@@ -132,17 +139,13 @@
       return weeklyPaths.get(`${s.week}_${s.scoring}_${s.view}`) || null;
     }
     if (s.view === "Overall") {
-      return `overall/${s.format}_${s.league_size}_${s.scoring}.json`;
+      return overallPaths.get(`${s.week}_${s.format}_${s.league_size}_${s.scoring}`) || null;
     }
-    return `positions/${s.scoring}/${s.view}.json`;
+    return positionPaths.get(`${s.week}_${s.scoring}_${s.view}`) || null;
   }
 
   function datasetAvailable(s = state) {
-    if (s.scope === "weekly") {
-      return weeklyPaths.has(`${s.week}_${s.scoring}_${s.view}`);
-    }
-    if (s.view === "Overall") return overallKeys.has(`${s.format}_${s.league_size}_${s.scoring}`);
-    return positionKeys.has(`${s.scoring}_${s.view}`);
+    return Boolean(getDatasetPath(s));
   }
 
   function loadDataset(path) {
@@ -151,6 +154,14 @@
       .then((res) => {
         if (!res.ok) throw new Error(`${path} ${res.status}`);
         return res.json();
+      })
+      .then((data) => {
+        const entry = Object.values(manifest?.datasets || {}).flat().find((d) => d.path === path);
+        if (entry) {
+          data.metadata = { ...data.metadata, publication_status: entry.publication_status,
+            locked_at_utc: entry.locked_at_utc };
+        }
+        return data;
       })
       .catch((err) => {
         cache.delete(path); // allow retry on transient failure
@@ -390,15 +401,8 @@
   // Best-guess dataset path from the URL (or documented defaults) BEFORE the
   // manifest has loaded, so the big dataset download can start in parallel.
   function speculativePath() {
-    const p = new URLSearchParams(window.location.search);
-    if (p.get("scope") === "weekly") return null;
-    const view = ["Overall", ...ROS_POSITIONS].includes(p.get("view")) ? p.get("view") : "Overall";
-    const scoring = SCORINGS.includes(p.get("scoring")) ? p.get("scoring") : "ppr";
-    const format = FORMATS.includes(p.get("format")) ? p.get("format") : "normal";
-    const sizeRaw = parseInt(p.get("league_size"), 10);
-    const league_size = SIZES.includes(sizeRaw) ? sizeRaw : 12;
-    if (view === "Overall") return `overall/${format}_${league_size}_${scoring}.json`;
-    return `positions/${scoring}/${view}.json`;
+    // The manifest owns archive paths and must load before a dataset is chosen.
+    return null;
   }
 
   function scopeOptions() {
@@ -426,7 +430,7 @@
     if (!scopeOptions().includes(state.scope)) state.scope = scopeOptions()[0] || "ros";
 
     const weeks = weekOptions();
-    if (state.scope === "weekly" && !weeks.includes(Number(state.week))) {
+    if (!weeks.includes(Number(state.week))) {
       state.week = weeks.includes(Number(manifest?.defaults?.week))
         ? Number(manifest.defaults.week)
         : (weeks.at(-1) ?? null);
@@ -475,7 +479,7 @@
   function writeUrlState() {
     const p = new URLSearchParams();
     p.set("scope", state.scope);
-    if (state.scope === "weekly" && state.week != null) p.set("week", String(state.week));
+    if (state.week != null) p.set("week", String(state.week));
     p.set("view", state.view);
     p.set("scoring", state.scoring);
     p.set("format", state.format);
@@ -506,7 +510,7 @@
     ).join("");
 
     const weeks = weekOptions();
-    el.weekControl.classList.toggle("is-hidden", state.scope !== "weekly");
+    el.weekControl.classList.toggle("is-hidden", weeks.length === 0);
     el.fmWeek.innerHTML = weeks.map((week) =>
       `<option value="${week}"${week === state.week ? " selected" : ""}>Week ${week}</option>`
     ).join("");
@@ -555,7 +559,7 @@
       chips.push(["Position", state.view]);
     }
     if (state.scope === "ros" && manifest.anchor_week != null) {
-      chips.push(["Anchor", `Week ${manifest.anchor_week}`]);
+      chips.push(["Anchor", `Week ${dsMeta?.anchor_week ?? state.week ?? manifest.anchor_week}`]);
     }
 
     el.fmMeta.innerHTML = chips.map(([k, v]) =>
@@ -573,9 +577,18 @@
     }
     el.fmSubtitle.textContent = sub;
 
-    el.fmHint.textContent = state.scope === "weekly"
-      ? formatInjuryOverlay(manifest.injury_overlay_as_of_utc)
-      : `Updated ${formatGenerated(manifest.generated_at_utc)}`;
+    const status = dsMeta?.publication_status;
+    const origin = status === "reconstructed" ? "Reconstructed archive"
+      : status === "recovered" ? "Original saved forecast"
+      : status === "official" ? "Locked pregame forecast" : "Pregame forecast";
+    const through = dsMeta?.completed_through_week;
+    const dateLabel = formatGenerated(dsMeta?.generated_at_utc || manifest.generated_at_utc);
+    el.fmHint.textContent = `${origin} · ${through != null ? `Results through Week ${through} · ` : ""}Generated ${dateLabel}`;
+    el.fmHint.title = dsMeta?.reconstruction_note || "";
+    if (dsMeta?.injury_overlay_as_of_utc) {
+      el.fmHint.textContent += ` · ${formatInjuryOverlay(dsMeta.injury_overlay_as_of_utc)}`;
+    }
+
 
     el.fmMethod.innerHTML = state.scope === "weekly"
       ? `Weekly ranks follow the model forecast; outcome and finish probabilities come from simulations. Injury tags are a cached overlay and do not change rank. For more information, see <a href="../Projects/index.html">here</a>.`
